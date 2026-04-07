@@ -14,8 +14,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   // Fetch related products from same category
   const relatedData = await getProducts(0, { category_id: product.category_id });
-  // Filter out the current product and take 4
-  const related = relatedData.products.filter(p => p.id !== product.id).slice(0, 4);
+  // Filter out the current product and take 10
+  const related = relatedData.products.filter(p => p.id !== product.id).slice(0, 10);
 
   return <ProductDetailClient product={product} relatedProducts={related as any} />;
 }

@@ -1,15 +1,15 @@
 import { createClient } from './server'
 import { Product, Brand, Category } from '@/types'
 
-export async function getProducts(page = 0, filters: { brand_id?: string, category_id?: string, is_on_sale?: boolean } = {}): Promise<{ products: Product[], total: number }> {
+export async function getProducts(page = 0, filters: { brand_id?: string, category_id?: string, is_on_sale?: boolean } = {}, limit?: number): Promise<{ products: Product[], total: number }> {
   const supabase = await createClient()
-  const PAGE_SIZE = 12
+  const PAGE_SIZE = limit || 12
   const from = page * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
   let query = supabase
     .from('products')
-    .select('id, name, description, price, sale_price, images, is_on_sale, brand_id, category_id, is_active', { count: 'exact' })
+    .select('*, brand:brand_id(*), category:category_id(*)', { count: 'exact' })
     .eq('is_active', true)
 
   if (filters.brand_id) query = query.eq('brand_id', filters.brand_id)
@@ -17,7 +17,14 @@ export async function getProducts(page = 0, filters: { brand_id?: string, catego
   if (filters.is_on_sale !== undefined) query = query.eq('is_on_sale', filters.is_on_sale)
 
   const { data, count, error } = await query.range(from, to).order('created_at', { ascending: false })
-  if (error) console.error('getProducts error:', error)
+  if (error) {
+    console.error('getProducts error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    })
+  }
   return { products: (data as Product[]) || [], total: count || 0 }
 }
 

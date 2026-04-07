@@ -27,6 +27,8 @@ export default function Navbar() {
 
   const [hovered, setHovered] = useState<string | null>(null);
   const [saleProducts, setSaleProducts] = useState<any[]>([]);
+  const [popularProducts, setPopularProducts] = useState<any[]>([]);
+  const [packProducts, setPackProducts] = useState<any[]>([]);
 
   useEffect(() => {
     const performSearch = async () => {
@@ -54,10 +56,16 @@ export default function Navbar() {
       try {
         const resCat = await fetch('/api/taxonomy?type=categories');
         const resBrand = await fetch('/api/taxonomy?type=brands');
+        const resPacks = await fetch('/api/taxonomy?type=pack_products');
         const resSale = await fetch('/api/search?sale=true');
         if (resCat.ok) setCategories(await resCat.json());
         if (resBrand.ok) setBrands(await resBrand.json());
+        if (resPacks.ok) setPackProducts(await resPacks.json());
         if (resSale.ok) setSaleProducts((await resSale.json()).slice(0, 5));
+        
+        // Fetch popular products for search default
+        const resPopular = await fetch('/api/search?popular=true');
+        if (resPopular.ok) setPopularProducts((await resPopular.json()).slice(0, 3));
       } catch (e) {
         console.error("Failed to load navbar taxonomy", e);
       }
@@ -240,7 +248,8 @@ export default function Navbar() {
               <div style={{ display: "flex", alignItems: "center", gap: "32px" }} className="hidden md:flex">
                 {[
                   { label: "PRODUITS", href: "/products" },
-                  { label: "MARQUES", href: "/products#brands" },
+                  { label: "MARQUES", href: "/marques" },
+                  { label: "PACKS", href: "/packs" },
                   { label: "SOLDES", href: "/products?sale=true" },
                 ].map((item) => (
                   <Link key={item.label} href={item.href} 
@@ -319,7 +328,7 @@ export default function Navbar() {
           borderTop: hovered ? "1px solid var(--border)" : "none",
           background: "rgba(10,10,10,0.4)"
         }}>
-          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px" }}>
+          <div className="hide-scrollbar" style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", maxHeight: "80vh", overflowY: "auto" }}>
             {hovered === "PRODUITS" && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "20px" }}>
                 {categories.map(cat => (
@@ -344,7 +353,7 @@ export default function Navbar() {
             {hovered === "MARQUES" && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "20px" }}>
                 {brands.map(brand => (
-                  <Link key={brand.id} href={`/products?brand=${brand.id}`} onClick={() => setHovered(null)}
+                  <Link key={brand.id} href={`/marques#brand-${brand.id}`} onClick={() => setHovered(null)}
                     style={{ 
                       textDecoration: "none", display: "flex", flexDirection: "column", gap: "12px", alignItems: "center",
                       padding: "16px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border)",
@@ -379,12 +388,44 @@ export default function Navbar() {
                       {p.images?.[0] && <Image src={p.images[0]} alt={p.name} fill style={{ objectFit: "contain" }} />}
                     </div>
                     <span style={{ fontFamily: "var(--font-condensed)", fontWeight: 300, fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.02em", textAlign: "center" }}>{p.name.toUpperCase()}</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--accent)" }}>{p.price.toLocaleString()} DA</span>
+                    <div style={{ display: "flex", gap: "8px", alignItems: "baseline" }}>
+                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--accent)" }}>{(p.sale_price || p.price).toLocaleString()} DA</span>
+                      {p.sale_price && (
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)", textDecoration: "line-through" }}>{p.price.toLocaleString()} DA</span>
+                      )}
+                    </div>
                   </Link>
                 ))}
                 {saleProducts.length === 0 && (
                   <div style={{ gridColumn: "span 5", textAlign: "center", padding: "40px" }}>
                     <p style={{ fontFamily: "var(--font-condensed)", fontSize: "18px", color: "var(--text-muted)" }}>AUCUNE PROMO EN COURS</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {hovered === "PACKS" && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
+                {packProducts.map(p => (
+                  <Link key={p.id} href={`/products/${p.id}`} onClick={() => setHovered(null)}
+                    style={{ 
+                      textDecoration: "none", display: "flex", flexDirection: "column", gap: "12px", alignItems: "center",
+                      padding: "16px", background: "rgba(255,255,255,0.02)", border: "1px solid var(--border)",
+                      transition: "all 0.2s ease", position: "relative"
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.background = "rgba(252,255,0,0.05)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+                  >
+                    <div style={{ width: "80px", height: "80px", position: "relative", background: "var(--bg-elevated)", padding: "10px" }}>
+                      {(p.nav_image || p.images?.[0]) && <Image src={p.nav_image || p.images[0]} alt={p.name} fill style={{ objectFit: "contain" }} />}
+                    </div>
+                    <span style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "14px", color: "#fff", letterSpacing: "0.05em", textAlign: "center" }}>{(p.nav_label || p.name).toUpperCase()}</span>
+                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "16px", color: "var(--accent)" }}>{p.price.toLocaleString()} DA</span>
+                  </Link>
+                ))}
+                {packProducts.length === 0 && (
+                  <div style={{ gridColumn: "span 5", textAlign: "center", padding: "40px" }}>
+                    <p style={{ fontFamily: "var(--font-condensed)", fontSize: "18px", color: "var(--text-muted)" }}>SÉLECTIONNEZ DES PACKS DANS LE DASHBOARD</p>
                   </div>
                 )}
               </div>
@@ -458,7 +499,7 @@ export default function Navbar() {
                     {brands.length === 0 ? (
                       <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>Chargement...</p>
                     ) : brands.map((brand) => (
-                      <Link key={brand.id} href={`/products?brand=${brand.id}`} onClick={() => setMenuOpen(false)} 
+                      <Link key={brand.id} href={`/marques#brand-${brand.id}`} onClick={() => setMenuOpen(false)} 
                         style={{
                           textDecoration: "none", 
                           fontFamily: "var(--font-condensed)", 
@@ -493,58 +534,173 @@ export default function Navbar() {
 
         {mounted && isMobile && (
           <div style={{ display: "flex", justifyContent: "space-around", gap: "8px", borderTop: "1px solid var(--border)", background: "var(--bg-secondary)", padding: "10px 12px" }}>
-            <Link href="/products" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "12px", color: "var(--text-primary)" }}>PRODUITS</Link>
-            <Link href="/products#brands" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "12px", color: "var(--text-primary)" }}>MARQUES</Link>
-            <Link href="/products?sale=true" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "12px", color: "var(--text-primary)" }}>SOLDES</Link>
+            <Link href="/products" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "11px", color: "var(--text-primary)" }}>PRODUITS</Link>
+            <Link href="/marques" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "11px", color: "var(--text-primary)" }}>MARQUES</Link>
+            <Link href="/packs" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "11px", color: "var(--text-primary)" }}>PACKS</Link>
+            <Link href="/products?sale=true" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "11px", color: "var(--text-primary)" }}>SOLDES</Link>
           </div>
         )}
 
       </nav>
 
-      {/* Search Overlay - Moved outside nav for proper transparency when scrolled */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .mobile-hide-scrollbar::-webkit-scrollbar { display: none; }
+      `}} />
+
+      {/* Search Overlay */}
       {searchOpen && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(10,10,10,0.7)", zIndex: 300, display: "flex", flexDirection: "column", padding: isMobile ? "12px" : "40px", backdropFilter: "blur(12px)" }}>
-          <div style={{ maxWidth: "800px", margin: "0 auto", width: "100%", position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "20px", marginBottom: isMobile ? "20px" : "50px" }}>
-              <Search size={isMobile ? 20 : 32} color="var(--accent)" style={{ flexShrink: 0 }} />
-              <input 
-                autoFocus
-                type="text" 
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder={isMobile ? "RECHERCHE..." : "NOM DU PRODUIT, MARQUE..."} 
-                style={{ flex: 1, minWidth: 0, background: "none", border: "none", borderBottom: "2px solid var(--border)", padding: isMobile ? "12px 0" : "16px 0", color: "#fff", fontSize: isMobile ? "16px" : "32px", fontFamily: "var(--font-condensed)", fontWeight: 700, outline: "none" }}
-              />
-              <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} style={{ flexShrink: 0, background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: "8px" }}>
-                <X size={isMobile ? 24 : 40} />
-              </button>
+        <div style={{ 
+          position: "fixed", 
+          inset: 0, 
+          background: "#ffffff", 
+          zIndex: 300, 
+          display: "flex", 
+          flexDirection: "column", 
+          animation: "fadeIn 0.2s ease",
+          color: "#000"
+        }}>
+          {!isMobile && <SearchInput isMobile={isMobile} searchQuery={searchQuery} setSearchQuery={setSearchQuery} setSearchOpen={setSearchOpen} />}
+
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: isMobile ? "1fr" : "260px 1fr", 
+            flex: 1, 
+            overflow: "hidden" 
+          }}>
+            {/* Sidebar */}
+            <div style={{ 
+              padding: isMobile ? "12px 0px" : "40px 40px", 
+              borderRight: isMobile ? "none" : "1px solid #eee",
+              overflowY: "auto",
+              display: isMobile && searchQuery.length > 0 ? "none" : "block",
+              background: "#fafafa"
+            }}>
+              {isMobile && (
+                <div style={{ padding: "0 20px", marginBottom: "16px" }}>
+                  <div style={{ 
+                    display: "flex", 
+                    overflowX: "auto", 
+                    gap: "8px", 
+                    padding: "4px 0",
+                    msOverflowStyle: "none",
+                    scrollbarWidth: "none"
+                  }} className="mobile-hide-scrollbar">
+                    {categories.map(cat => (
+                      <Link 
+                        key={cat.id} 
+                        href={`/products?category=${cat.id}`} 
+                        onClick={() => setSearchOpen(false)} 
+                        style={{ 
+                          color: "#333", 
+                          textDecoration: "none", 
+                          fontSize: "12px", 
+                          fontFamily: "var(--font-condensed)", 
+                          whiteSpace: "nowrap",
+                          padding: "8px 16px",
+                          border: "1px solid #ddd",
+                          background: "#fff",
+                          borderRadius: "4px",
+                          fontWeight: 700
+                        }} 
+                      >
+                        {cat.name.toUpperCase()}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {isMobile && <SearchInput isMobile={isMobile} searchQuery={searchQuery} setSearchQuery={setSearchQuery} setSearchOpen={setSearchOpen} />}
+
+              {!isMobile && (
+                <div style={{ marginBottom: "40px" }}>
+                  <h4 style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, marginBottom: "20px" }}>RECHERCHES RÉCENTES</h4>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    {["boo", "burn", "bur", "bi", "bo", "boas", "boa", "crea"].map(item => (
+                      <button 
+                        key={item} 
+                        onClick={() => setSearchQuery(item)} 
+                        style={{ 
+                          background: "#fff", 
+                          border: "1px solid #ddd", 
+                          color: "#444", 
+                          padding: "5px 10px",
+                          fontSize: "12px", 
+                          fontFamily: "var(--font-condensed)", 
+                          cursor: "pointer", 
+                          transition: "all 0.2s",
+                          borderRadius: "4px",
+                        }} 
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!isMobile && (
+                <div>
+                  <h4 style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, marginBottom: "20px" }}>CATÉGORIES</h4>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {categories.map(cat => (
+                      <Link 
+                        key={cat.id} 
+                        href={`/products?category=${cat.id}`} 
+                        onClick={() => setSearchOpen(false)} 
+                        style={{ color: "#333", textDecoration: "none", fontSize: "14px", fontFamily: "var(--font-condensed)", fontWeight: 600 }}
+                      >
+                        {cat.name.toUpperCase()}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "75vh", overflow: "auto", paddingRight: "10px" }}>
+            {/* Content Area */}
+            <div style={{ 
+              padding: isMobile ? "20px" : "40px 60px", 
+              overflowY: "auto",
+              background: "#fff"
+            }}>
               {isSearching ? (
-                <p style={{ fontFamily: "var(--font-condensed)", color: "var(--accent)", letterSpacing: "0.1em" }}>RECHERCHE EN COURS...</p>
-              ) : searchResults.length > 0 ? (
-                searchResults.map(p => (
-                  <Link key={p.id} href={`/products/${p.id}`} onClick={() => { setSearchOpen(false); setSearchQuery(""); }} 
-                    style={{ display: "flex", gap: "16px", alignItems: "center", padding: "12px", background: "#0A0A0A", border: "1px solid var(--border)", textDecoration: "none", transition: "all 0.15s ease", borderRadius: "0" }}
-                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = "#0A0A0A"; e.currentTarget.style.borderColor = "var(--border)"; }}
-                  >
-                    <div style={{ position: "relative", width: "56px", height: "56px", background: "#0A0A0A", border: "1px solid var(--border)", borderRadius: "0", flexShrink: 0 }}>
-                      {p.images?.[0] && <Image src={p.images[0]} alt="" fill style={{ objectFit: "contain", padding: "4px" }} />}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "15px", color: "#fff", marginBottom: "2px" }}>{p.name.toUpperCase()}</p>
-                      <p style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.02em" }}>{p.brand?.name || "RIVER NUTRITION"}</p>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <p style={{ fontFamily: "var(--font-display)", fontSize: "20px", color: "var(--accent)" }}>{p.price.toLocaleString()} DA</p>
-                    </div>
-                  </Link>
-                ))
-              ) : searchQuery.length > 2 && (
-                <div style={{ textAlign: "center", padding: "40px" }}>
-                  <p style={{ color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontSize: "18px" }}>AUCUN RÉSULTAT POUR "{searchQuery.toUpperCase()}"</p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}><p>Chargement...</p></div>
+              ) : searchQuery.length > 0 ? (
+                <div style={{ 
+                  display: "grid", 
+                  gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", 
+                  gap: isMobile ? "16px" : "32px" 
+                }}>
+                  {searchResults.map(p => (
+                    <Link key={p.id} href={`/products/${p.id}`} onClick={() => setSearchOpen(false)} style={{ textDecoration: "none", display: "flex", flexDirection: "column" }}>
+                      <div style={{ width: "100%", aspectRatio: "1/1", border: "1px solid #eee", borderBottom: "2px solid #000", position: "relative", marginBottom: "12px" }}>
+                        {p.images?.[0] && <Image src={p.images[0]} alt={p.name} fill style={{ objectFit: "contain", padding: isMobile ? "12px" : "24px" }} />}
+                      </div>
+                      <p style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: isMobile ? "13px" : "15px", color: "#000", height: isMobile ? "32px" : "40px", overflow: "hidden" }}>{p.name.toUpperCase()}</p>
+                      <p style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? "16px" : "20px", color: "#000" }}>{p.price.toLocaleString()} DA</p>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <p style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", color: "#999", marginBottom: "24px", fontWeight: 800 }}>PRODUITS POPULAIRES</p>
+                  <div style={{ 
+                    display: "grid", 
+                    gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", 
+                    gap: isMobile ? "16px" : "32px" 
+                  }}>
+                    {popularProducts.map(p => (
+                      <Link key={p.id} href={`/products/${p.id}`} onClick={() => setSearchOpen(false)} style={{ textDecoration: "none", display: "flex", flexDirection: "column" }}>
+                        <div style={{ width: "100%", aspectRatio: "1/1", border: "1px solid #eee", borderBottom: "2px solid #000", position: "relative", marginBottom: "12px" }}>
+                          {p.images?.[0] && <Image src={p.images[0]} alt={p.name} fill style={{ objectFit: "contain", padding: isMobile ? "12px" : "24px" }} />}
+                        </div>
+                        <p style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: isMobile ? "13px" : "15px", color: "#000", height: isMobile ? "32px" : "40px", overflow: "hidden" }}>{p.name.toUpperCase()}</p>
+                        <p style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? "16px" : "20px", color: "#000" }}>{p.price.toLocaleString()} DA</p>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -557,3 +713,55 @@ export default function Navbar() {
     </>
   );
 }
+
+const SearchInput = ({ isMobile, searchQuery, setSearchQuery, setSearchOpen }: any) => (
+  <div style={{ 
+    padding: isMobile ? "16px 20px" : "24px 60px", 
+    borderBottom: "1px solid #eee",
+    display: "flex",
+    alignItems: "center",
+    gap: "24px",
+    background: "#fff"
+  }}>
+    <Search size={isMobile ? 22 : 26} color="#000" />
+    <input 
+      autoFocus
+      type="text" 
+      value={searchQuery}
+      onChange={e => setSearchQuery(e.target.value)}
+      placeholder="RECHERCHER UN PRODUIT, UNE MARQUE..." 
+      style={{ 
+        flex: 1, 
+        background: "none", 
+        border: "none", 
+        color: "#000", 
+        fontSize: isMobile ? "18px" : "24px", 
+        fontFamily: "var(--font-condensed)", 
+        fontWeight: 700, 
+        outline: "none",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em"
+      }}
+    />
+    <button 
+      onClick={() => { setSearchOpen(false); setSearchQuery(""); }} 
+      style={{ 
+        background: "#f5f5f5", 
+        border: "none", 
+        color: "#666", 
+        cursor: "pointer", 
+        width: "40px", 
+        height: "40px", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center",
+        transition: "all 0.2s",
+        borderRadius: "50%"
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = "#000"; e.currentTarget.style.color = "#fff"; }}
+      onMouseLeave={e => { e.currentTarget.style.background = "#f5f5f5"; e.currentTarget.style.color = "#666"; }}
+    >
+      <X size={20} />
+    </button>
+  </div>
+);

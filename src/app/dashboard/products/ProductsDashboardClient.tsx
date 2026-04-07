@@ -9,7 +9,10 @@ import { useRouter } from "next/navigation";
 const emptyForm = { 
   name: "", description: "", price: "", sale_price: "", brand_id: "", category_id: "", 
   is_on_sale: false, images: "", bienfaits: "", utilisation: "", ingredients: "",
-  variants: [{ flavor: "Standard", size: "", stock: "0" }]
+  variants: [{ flavor: "Standard", size: "", stock: "0" }],
+  navbar_order: null as number | null,
+  nav_label: "",
+  nav_image: ""
 };
 
 export default function ProductsDashboardClient({ 
@@ -36,8 +39,16 @@ export default function ProductsDashboardClient({
 
   const openAdd = () => { setForm(emptyForm); setEditProduct(null); setShowModal(true); };
   
+  const openAddPack = () => { 
+    const packCat = categories.find(c => c.name.toLowerCase().includes("pack"));
+    setForm({ ...emptyForm, category_id: packCat?.id || "" }); 
+    setEditProduct(null); 
+    setShowModal(true); 
+  };
+  
   const openEdit = (p: any) => {
     setForm({ 
+      ...emptyForm,
       name: p.name, 
       description: p.description, 
       price: String(p.price), 
@@ -49,9 +60,12 @@ export default function ProductsDashboardClient({
       bienfaits: p.bienfaits || "",
       utilisation: p.utilisation || "",
       ingredients: p.ingredients || "",
+      navbar_order: p.navbar_order || null,
+      nav_label: p.nav_label || "",
+      nav_image: p.nav_image || "",
       variants: p.variants && p.variants.length > 0 
         ? p.variants.map((v: any) => ({ flavor: v.flavor, size: v.size, stock: String(v.stock) }))
-        : [{ flavor: "Standard", size: "", stock: "0" }]
+        : emptyForm.variants
     });
     setEditProduct(p);
     setShowModal(true);
@@ -79,12 +93,18 @@ export default function ProductsDashboardClient({
 
     const parsedPrice = parseFloat(String(form.price).replace(/,/g, '')) || 0;
     const parsedSale = parseFloat(String(form.sale_price).replace(/,/g, ''));
+    const finalSalePrice = !isNaN(parsedSale) ? parsedSale : null;
+
+    if (finalSalePrice !== null && finalSalePrice > parsedPrice) {
+      setIsSaving(false);
+      return alert("ERREUR: Le prix promo ne peut pas être supérieur au prix normal.");
+    }
 
     const productPayload = {
       name: form.name,
       description: form.description,
       price: parsedPrice,
-      sale_price: !isNaN(parsedSale) ? parsedSale : null,
+      sale_price: finalSalePrice,
       brand_id: form.brand_id || null,
       category_id: form.category_id || null,
       is_on_sale: form.is_on_sale,
@@ -92,7 +112,10 @@ export default function ProductsDashboardClient({
       is_active: true,
       bienfaits: form.bienfaits,
       utilisation: form.utilisation,
-      ingredients: form.ingredients
+      ingredients: form.ingredients,
+      navbar_order: form.navbar_order,
+      nav_label: form.nav_label,
+      nav_image: form.nav_image
     };
 
     try {
@@ -105,6 +128,11 @@ export default function ProductsDashboardClient({
         const { data, error } = await supabase.from("products").insert(productPayload).select("id").single();
         if (error) throw error;
         savedProductId = data.id;
+      }
+
+      // Handle potential duplicate slots: if this product takes a slot, clear others in that slot
+      if (form.navbar_order && form.navbar_order > 0) {
+        await supabase.from("products").update({ navbar_order: null }).eq("navbar_order", form.navbar_order).neq("id", savedProductId || "");
       }
 
       // Handle variants: delete old ones and insert new ones
@@ -144,9 +172,14 @@ export default function ProductsDashboardClient({
           <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>CATALOGUE</p>
           <h1 className="section-heading" style={{ fontSize: "36px" }}>PRODUITS</h1>
         </div>
-        <button onClick={openAdd} className="btn-accent" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 20px", borderRadius: "0px", border: "none", cursor: "pointer", fontSize: "14px" }}>
-          <Plus size={16} /> NOUVEAU PRODUIT
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={openAdd} className="btn-accent" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 20px", borderRadius: "0px", border: "none", cursor: "pointer", fontSize: "14px" }}>
+            <Plus size={16} /> NOUVEAU PRODUIT
+          </button>
+          <button onClick={openAddPack} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 20px", borderRadius: "0px", border: "1px solid var(--accent)", background: "rgba(232,255,0,0.05)", color: "var(--accent)", cursor: "pointer", fontSize: "14px", fontFamily: "var(--font-condensed)", fontWeight: 700 }}>
+            <Plus size={16} /> NOUVEAU PACK
+          </button>
+        </div>
       </div>
 
       <div style={{ position: "relative", marginBottom: "20px" }}>
@@ -294,6 +327,41 @@ export default function ProductsDashboardClient({
                     />
                   </div>
                 ))}
+              </div>
+              
+              <div style={{ padding: "16px", background: "rgba(232,255,0,0.05)", border: "1px solid var(--border-bright)", marginBottom: "16px" }}>
+                <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.08em", fontWeight: 700, color: "var(--accent)", marginBottom: "8px" }}>
+                  SÉLECTIONNER L'EMPLACEMENT DANS LE MENU (PACKS)
+                </label>
+                <select 
+                  value={form.navbar_order || ""} 
+                  onChange={e => setForm({ ...form, navbar_order: e.target.value ? parseInt(e.target.value) : null })}
+                  className="input-dark"
+                  style={{ width: "100%", padding: "10px", borderRadius: "0", background: "rgba(0,0,0,0.3)", border: "1px solid var(--border)", color: "#fff" }}
+                >
+                  <option value="">-- NE PAS AFFICHER DANS LE MENU --</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => {
+                    const current = products.find(p => p.navbar_order === n && p.id !== editProduct?.id);
+                    return (
+                      <option key={n} value={n}>
+                        EMPLACEMENT {n} {current ? `(Actuel: ${current.name})` : "(Libre)"}
+                      </option>
+                      );
+                  })}
+                </select>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "10px" }}>
+                   <div>
+                      <label style={{ display: "block", fontSize: "9px", color: "var(--text-muted)", marginBottom: "4px" }}>TITRE PERSO MENU (OPTIONNEL)</label>
+                      <input type="text" value={form.nav_label} onChange={e => setForm({...form, nav_label: e.target.value})} placeholder="Passez à l'action !" className="input-dark" style={{ width: "100%", padding: "8px", fontSize: "12px", border: "1px solid var(--border)" }} />
+                   </div>
+                   <div>
+                      <label style={{ display: "block", fontSize: "9px", color: "var(--text-muted)", marginBottom: "4px" }}>IMAGE PERSO MENU (URL)</label>
+                      <input type="text" value={form.nav_image} onChange={e => setForm({...form, nav_image: e.target.value})} placeholder="https://..." className="input-dark" style={{ width: "100%", padding: "8px", fontSize: "12px", border: "1px solid var(--border)" }} />
+                   </div>
+                </div>
+                <p style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "6px", fontStyle: "italic" }}>
+                  Astuce : Choisir un emplacement occupé remplacera le pack actuel.
+                </p>
               </div>
 
               {/* Variants Section */}

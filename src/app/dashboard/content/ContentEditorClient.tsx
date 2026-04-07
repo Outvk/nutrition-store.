@@ -71,7 +71,7 @@ export default function ContentEditorClient({ initialContent }: { initialContent
       badgeColor: "#e6ff03ff",
       endsAt: new Date(Date.now() + 24 * 3600000).toISOString()
     },
-    featured: { label: "EXCLUSIVITÉS NOEST", heading: "TOP SELLING WORTH THE HYPE", image: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&q=80" }
+    featured: { label: "EXCLUSIVITÉS NOEST", heading: "TOP SELLING WORTH THE HYPE", imageWorth: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&q=80", imageSale: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80" }
   };
 
   const [content, setContent] = useState(() => {
@@ -575,22 +575,42 @@ export default function ContentEditorClient({ initialContent }: { initialContent
             <div className="fade-in" style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", padding: "32px" }}>
               <h3 style={{ fontFamily: "var(--font-condensed)", fontSize: "18px", fontWeight: 700, letterSpacing: "0.06em", marginBottom: "28px" }}>SECTION EXCLUSIVITÉS</h3>
               <div style={{ display: "grid", gap: "24px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 160px", gap: "20px", alignItems: "end" }}>
-                  <div>
-                    <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>IMAGE PRINCIPALE (DISCOVERY)</label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "4px 4px 4px 12px" }}>
-                      <ImageIcon size={14} color="var(--text-muted)" />
-                      <input type="text" value={content.featured.image} onChange={e => handleUpdate("featured", "image", e.target.value)}
-                        style={{ flex: 1, background: "none", border: "none", padding: "8px 0", color: "#fff", fontSize: "12px" }}
-                      />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 120px", gap: "10px", alignItems: "end" }}>
+                    <div>
+                      <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>IMAGE TUBE (WORTH THE HYPE)</label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "4px 4px 4px 12px" }}>
+                        <ImageIcon size={14} color="var(--text-muted)" />
+                        <input type="text" value={content.featured.imageWorth} onChange={e => handleUpdate("featured", "imageWorth", e.target.value)}
+                          style={{ flex: 1, background: "none", border: "none", padding: "8px 0", color: "#fff", fontSize: "12px" }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ height: "46px", border: "1px solid var(--border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {content.featured.imageWorth ? (
+                        <img src={content.featured.imageWorth} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <ImageIcon size={16} color="var(--text-muted)" />
+                      )}
                     </div>
                   </div>
-                  <div style={{ height: "64px", border: "1px solid var(--border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {content.featured.image ? (
-                      <img src={content.featured.image} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      <ImageIcon size={20} color="var(--text-muted)" />
-                    )}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 120px", gap: "10px", alignItems: "end" }}>
+                    <div>
+                      <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>IMAGE TUBE (ON SALE)</label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "4px 4px 4px 12px" }}>
+                        <ImageIcon size={14} color="var(--text-muted)" />
+                        <input type="text" value={content.featured.imageSale} onChange={e => handleUpdate("featured", "imageSale", e.target.value)}
+                          style={{ flex: 1, background: "none", border: "none", padding: "8px 0", color: "#fff", fontSize: "12px" }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ height: "46px", border: "1px solid var(--border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {content.featured.imageSale ? (
+                        <img src={content.featured.imageSale} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <ImageIcon size={16} color="var(--text-muted)" />
+                      )}
+                    </div>
                   </div>
                 </div>
 

@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { Zap, Globe, MessageCircle } from "lucide-react";
 import { STORE_CONFIG } from "@/lib/config";

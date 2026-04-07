@@ -413,9 +413,10 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
             
             <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
               <Image 
-                src={landingContent?.featured?.image || (activeTab === "worth" 
-                  ? "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&q=80" 
-                  : "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80")} 
+                src={activeTab === "worth" 
+                  ? (landingContent?.featured?.imageWorth || "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&q=80")
+                  : (landingContent?.featured?.imageSale || "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80")
+                } 
                 alt="" 
                 fill 
                 style={{ objectFit: "cover" }}

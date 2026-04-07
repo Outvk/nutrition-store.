@@ -534,7 +534,9 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           <div>
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: "60px", marginBottom: "32px" }}>
               <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>VOUS AIMEREZ AUSSI</p>
-              <h2 className="section-heading" style={{ fontSize: "32px" }}>PRODUITS SIMILAIRES</h2>
+              <h2 className="section-heading" style={{ fontSize: "32px" }}>
+                {product.category?.name.toLowerCase().includes("pack") ? "DÉCOUVREZ D'AUTRES PACKS" : "PRODUITS SIMILAIRES"}
+              </h2>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "16px" }}>
               {related.map(p => <ProductCard key={p.id} product={p} />)}

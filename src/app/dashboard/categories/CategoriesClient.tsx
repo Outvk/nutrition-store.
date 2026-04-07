@@ -9,11 +9,14 @@ import { useRouter } from "next/navigation";
 const emptyForm = { name: "", slug: "", image_url: "" };
 
 export default function CategoriesClient({ 
-  initialCategories 
+  initialCategories,
+  initialPacks = []
 }: { 
   initialCategories: Category[];
+  initialPacks: any[];
 }) {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [packs, setPacks] = useState<any[]>(initialPacks);
   const [showModal, setShowModal] = useState(false);
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -62,6 +65,13 @@ export default function CategoriesClient({
     }
   };
 
+  const togglePackNav = async (id: string, current: boolean) => {
+    const supabase = createClient();
+    setPacks(ps => ps.map(p => p.id === id ? { ...p, show_in_navbar: !current } : p));
+    await supabase.from("products").update({ show_in_navbar: !current }).eq("id", id);
+    router.refresh();
+  };
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "28px" }}>
@@ -74,7 +84,7 @@ export default function CategoriesClient({
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px", marginBottom: "60px" }}>
         {categories.map(cat => (
           <div key={cat.id} style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: "0", padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -92,6 +102,51 @@ export default function CategoriesClient({
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Packs Section */}
+      <div style={{ marginBottom: "28px", borderTop: "1px solid var(--border)", paddingTop: "40px" }}>
+        <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700 }}>NAVIGATION</p>
+        <h2 className="section-heading" style={{ fontSize: "28px", marginBottom: "16px" }}>PACKS DANS LE MENU</h2>
+        <p style={{ fontSize: "13px", color: "var(--text-muted)", marginBottom: "24px" }}>Sélectionnez jusqu'à 5 packs pour les afficher au survol du bouton "PACKS" dans la barre de navigation.</p>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "12px" }}>
+          {packs.map(pack => (
+            <div key={pack.id} style={{ 
+              background: pack.show_in_navbar ? "rgba(232,255,0,0.05)" : "var(--bg-secondary)", 
+              border: pack.show_in_navbar ? "1px solid var(--accent)" : "1px solid var(--border)", 
+              padding: "12px 16px",
+              display: "flex", 
+              justifyContent: "space-between", 
+              alignItems: "center"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                 <div style={{ position: "relative", width: "40px", height: "40px", background: "var(--bg-elevated)" }}>
+                    {pack.images?.[0] && <Image src={pack.images[0]} alt="" fill style={{ objectFit: "contain" }} />}
+                 </div>
+                 <span style={{ fontSize: "14px", fontWeight: 600, color: pack.show_in_navbar ? "#fff" : "var(--text-secondary)" }}>{pack.name}</span>
+              </div>
+              <button 
+                onClick={() => togglePackNav(pack.id, pack.show_in_navbar)}
+                style={{ 
+                  background: pack.show_in_navbar ? "var(--accent)" : "rgba(255,255,255,0.05)", 
+                  border: "none", 
+                  padding: "6px 12px", 
+                  fontFamily: "var(--font-condensed)", 
+                  fontWeight: 800, 
+                  fontSize: "10px", 
+                  color: pack.show_in_navbar ? "#000" : "var(--text-muted)",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}>
+                {pack.show_in_navbar ? "AFFICHÉ" : "MASQUÉ"}
+              </button>
+            </div>
+          ))}
+          {packs.length === 0 && (
+            <p style={{ gridColumn: "span 3", padding: "20px", textAlign: "center", color: "var(--text-muted)", border: "1px dashed var(--border)" }}>Créez d'abord des produits dans la catégorie "Packs".</p>
+          )}
+        </div>
       </div>
 
       {showModal && (
