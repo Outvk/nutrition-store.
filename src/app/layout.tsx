@@ -21,7 +21,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "AdemNutrition — Sport Supplements Algeria",
+  title: "RiverNutrition — Sport Supplements Algeria",
   description: "Suppléments sportifs authentiques livrés partout en Algérie",
 };
 

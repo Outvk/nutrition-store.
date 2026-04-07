@@ -6,7 +6,7 @@ import { WILAYAS } from "@/types";
 const DEFAULT_FEES: Record<string, string> = { "Alger": "400", "Oran": "500", "Constantine": "500", "Annaba": "600", "Blida": "400", "Sétif": "550" };
 
 export default function SettingsPage() {
-  const [store, setStore] = useState({ name: "AdemNutrition", phone: "0555 000 000", instagram: "@ademnutrition", description: "Suppléments sportifs authentiques livrés partout en Algérie." });
+  const [store, setStore] = useState({ name: "RiverNutrition", phone: "0555 000 000", instagram: "@rivernutrition", description: "Suppléments sportifs authentiques livrés partout en Algérie." });
   const [fees, setFees] = useState<Record<string, string>>(DEFAULT_FEES);
   const [defaultFee, setDefaultFee] = useState("700");
   const [saved, setSaved] = useState(false);
@@ -40,9 +40,9 @@ export default function SettingsPage() {
       </div>
 
       <Section title="INFORMATIONS DE LA BOUTIQUE" icon={Store}>
-        <Field label="NOM DE LA BOUTIQUE" value={store.name} onChange={v => setStore(s => ({ ...s, name: v }))} placeholder="AdemNutrition" />
+        <Field label="NOM DE LA BOUTIQUE" value={store.name} onChange={v => setStore(s => ({ ...s, name: v }))} placeholder="RiverNutrition" />
         <Field label="TÉLÉPHONE" value={store.phone} onChange={v => setStore(s => ({ ...s, phone: v }))} placeholder="0555 000 000" />
-        <Field label="INSTAGRAM" value={store.instagram} onChange={v => setStore(s => ({ ...s, instagram: v }))} placeholder="@ademnutrition" />
+        <Field label="INSTAGRAM" value={store.instagram} onChange={v => setStore(s => ({ ...s, instagram: v }))} placeholder="@rivernutrition" />
         <div>
           <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.08em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "6px" }}>DESCRIPTION</label>
           <textarea value={store.description} onChange={e => setStore(s => ({ ...s, description: e.target.value }))} rows={3}
@@ -83,9 +83,9 @@ export default function SettingsPage() {
       <Section title="CONTACT & RÉSEAUX SOCIAUX" icon={Phone}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
           <Field label="WHATSAPP" value="" onChange={() => {}} placeholder="+213 555 000 000" />
-          <Field label="FACEBOOK PAGE" value="" onChange={() => {}} placeholder="facebook.com/ademnutrition" />
-          <Field label="EMAIL" value="" onChange={() => {}} placeholder="contact@ademnutrition.dz" type="email" />
-          <Field label="SITE WEB" value="" onChange={() => {}} placeholder="ademnutrition.dz" />
+          <Field label="FACEBOOK PAGE" value="" onChange={() => {}} placeholder="facebook.com/rivernutrition" />
+          <Field label="EMAIL" value="" onChange={() => {}} placeholder="contact@rivernutrition.dz" type="email" />
+          <Field label="SITE WEB" value="" onChange={() => {}} placeholder="rivernutrition.dz" />
         </div>
       </Section>
 
