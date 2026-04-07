@@ -199,7 +199,9 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                     </div>
                     <div style={{ display: "flex", gap: "12px" }}>
                       <span style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>{order.id}</span>
-                      <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{new Date(order.created_at).toLocaleDateString("fr-DZ")}</span>
+                      <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                        {new Date(order.created_at).toLocaleDateString("fr-DZ")} • {new Date(order.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                      </span>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>

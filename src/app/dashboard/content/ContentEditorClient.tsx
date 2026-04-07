@@ -15,10 +15,22 @@ import {
   Target
 } from "lucide-react";
 
+import { Product } from "@/types";
+
 export default function ContentEditorClient({ initialContent }: { initialContent: any }) {
   const [activeTab, setActiveTab] = useState("hero");
   const [saving, setSaving] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from("products").select("*, brand:brands(*)").order("name");
+      if (data) setProducts(data);
+    };
+    fetchProducts();
+  }, []);
 
   const defaults = {
     hero: {
@@ -40,8 +52,25 @@ export default function ContentEditorClient({ initialContent }: { initialContent
         { label: "", image: "", categoryId: "" }
       ]
     },
-    promo: { text: "OFFRE SPÉCIALE · JUSQU'À -40% · STOCKS LIMITÉS" },
-    flash: { label: "OFFRE LIMITÉE", heading: "SOLDES SPÉCIAUX", featuredTitle: "ON OPTI-WOMEN", featuredTag: "[FEATURED]", featuredImage: "/on-opti-women_Image_01.webp", featuredSalePrice: "4900", featuredOriginalPrice: "6500" },
+    promo: { 
+      text: "OFFRE SPÉCIALE · JUSQU'À -40% · STOCKS LIMITÉS",
+      bgColor: "#FF51C5",
+      textColor: "#000000"
+    },
+    flash: { 
+      productId: "",
+      label: "OFFRE LIMITÉE", 
+      heading: "SOLDES SPÉCIAUX", 
+      featuredTitle: "ON OPTI-WOMEN", 
+      featuredTag: "[FEATURED]", 
+      featuredImage: "/on-opti-women_Image_01.webp", 
+      featuredSalePrice: "4900", 
+      featuredOriginalPrice: "6500",
+      bgColor: "#0A0A0A",
+      accentColor: "#FF51C5",
+      badgeColor: "#e6ff03ff",
+      endsAt: new Date(Date.now() + 24 * 3600000).toISOString()
+    },
     featured: { label: "EXCLUSIVITÉS NOEST", heading: "TOP SELLING WORTH THE HYPE", image: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&q=80" }
   };
 
@@ -111,6 +140,17 @@ export default function ContentEditorClient({ initialContent }: { initialContent
   return (
     <div className="dash-content-editor" style={{ color: "var(--text-primary)" }}>
       {/* Header */}
+      <style>{`
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
+          cursor: pointer;
+          opacity: 0.8;
+          transition: opacity 0.2s;
+        }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+          opacity: 1;
+        }
+      `}</style>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "32px", paddingBottom: "24px", borderBottom: "1px solid var(--border)" }}>
         <div>
           <p style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.22em", color: "var(--accent)", fontWeight: 700, marginBottom: "8px" }}>EDITEUR VISUEL</p>
@@ -315,6 +355,34 @@ export default function ContentEditorClient({ initialContent }: { initialContent
                 />
                 <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "12px" }}>Utilisez le point médian (·) pour séparer les offres.</p>
               </div>
+              
+              <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "24px", marginTop: "16px" }}>
+                <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.13em", fontWeight: 700, color: "var(--accent)", marginBottom: "16px" }}>PERSONNALISATION DES COULEURS</label>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px" }}>COULEUR DE FOND</label>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <input type="color" value={content.promo.bgColor || "#FF51C5"} onChange={e => handleUpdate("promo", "bgColor", e.target.value)}
+                        style={{ width: "32px", height: "32px", border: "1px solid var(--border)", background: "none", cursor: "pointer" }}
+                      />
+                      <input type="text" value={content.promo.bgColor || "#FF51C5"} onChange={e => handleUpdate("promo", "bgColor", e.target.value)}
+                        style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "4px 8px", color: "#fff", fontSize: "12px" }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px" }}>COULEUR DU TEXTE</label>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <input type="color" value={content.promo.textColor || "#000000"} onChange={e => handleUpdate("promo", "textColor", e.target.value)}
+                        style={{ width: "32px", height: "32px", border: "1px solid var(--border)", background: "none", cursor: "pointer" }}
+                      />
+                      <input type="text" value={content.promo.textColor || "#000000"} onChange={e => handleUpdate("promo", "textColor", e.target.value)}
+                        style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "4px 8px", color: "#fff", fontSize: "12px" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -340,6 +408,49 @@ export default function ContentEditorClient({ initialContent }: { initialContent
 
                 <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "24px" }}>
                   <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.13em", fontWeight: 700, color: "var(--accent)", marginBottom: "16px" }}>PRODUIT VEDETTE (IMAGE & PRIX)</label>
+                  
+                  <div style={{ marginBottom: "24px" }}>
+                    <label style={{ display: "block", fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px" }}>SÉLECTIONNER UN PRODUIT</label>
+                    <select 
+                      value={content.flash.productId || ""} 
+                      onChange={(e) => {
+                        const pid = e.target.value;
+                        const product = products.find(p => p.id === pid);
+                        if (product) {
+                          setContent((prev: any) => ({
+                            ...prev,
+                            flash: {
+                              ...prev.flash,
+                              productId: pid,
+                              featuredTitle: product.name.toUpperCase(),
+                              featuredImage: product.images[0] || "",
+                              featuredSalePrice: (product.sale_price || product.price).toString(),
+                              featuredOriginalPrice: product.price.toString(),
+                              featuredTag: product.brand?.name ? `[${product.brand.name.toUpperCase()}]` : "[FEATURED]"
+                            }
+                          }));
+                        } else {
+                          handleUpdate("flash", "productId", "");
+                        }
+                      }}
+                      style={{ 
+                        width: "100%", 
+                        background: "rgba(255,255,255,0.03)", 
+                        border: "1px solid var(--border)", 
+                        padding: "12px 16px", 
+                        color: "#fff",
+                        fontSize: "13px"
+                      }}
+                    >
+                      <option value="" style={{ background: "var(--bg-secondary)" }}>-- Sélectionner un produit --</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id} style={{ background: "var(--bg-secondary)" }}>
+                          {p.name} ({p.price} DA)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 180px", gap: "20px", marginBottom: "20px" }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                       <div>
@@ -387,6 +498,71 @@ export default function ContentEditorClient({ initialContent }: { initialContent
                       <input type="text" value={content.flash.featuredTag} onChange={e => handleUpdate("flash", "featuredTag", e.target.value)}
                         style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff" }}
                       />
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "24px" }}>
+                    <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.13em", fontWeight: 700, color: "var(--accent)", marginBottom: "16px" }}>PERSONNALISATION DES COULEURS</label>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px" }}>COULEUR DE FOND</label>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <input type="color" value={content.flash.bgColor || "#0A0A0A"} onChange={e => handleUpdate("flash", "bgColor", e.target.value)}
+                            style={{ width: "32px", height: "32px", border: "1px solid var(--border)", background: "none", cursor: "pointer" }}
+                          />
+                          <input type="text" value={content.flash.bgColor || "#0A0A0A"} onChange={e => handleUpdate("flash", "bgColor", e.target.value)}
+                            style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "4px 8px", color: "#fff", fontSize: "12px" }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px" }}>COULEUR ACCENT (ROSE)</label>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <input type="color" value={content.flash.accentColor || "#FF51C5"} onChange={e => handleUpdate("flash", "accentColor", e.target.value)}
+                            style={{ width: "32px", height: "32px", border: "1px solid var(--border)", background: "none", cursor: "pointer" }}
+                          />
+                          <input type="text" value={content.flash.accentColor || "#FF51C5"} onChange={e => handleUpdate("flash", "accentColor", e.target.value)}
+                            style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "4px 8px", color: "#fff", fontSize: "12px" }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px" }}>COULEUR BADGE (-25%)</label>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <input type="color" value={content.flash.badgeColor || "#e6ff03ff"} onChange={e => handleUpdate("flash", "badgeColor", e.target.value)}
+                            style={{ width: "32px", height: "32px", border: "1px solid var(--border)", background: "none", cursor: "pointer" }}
+                          />
+                          <input type="text" value={content.flash.badgeColor || "#e6ff03ff"} onChange={e => handleUpdate("flash", "badgeColor", e.target.value)}
+                            style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "4px 8px", color: "#fff", fontSize: "12px" }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "24px", marginTop: "16px" }}>
+                    <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.13em", fontWeight: 700, color: "var(--accent)", marginBottom: "16px" }}>CONTRÔLE DU COMPTE À REBOURS</label>
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px" }}>DATE ET HEURE D'EXPIRATION</label>
+                      <input 
+                        type="datetime-local" 
+                        value={content.flash.endsAt ? new Date(content.flash.endsAt).toISOString().slice(0, 16) : ""} 
+                        onClick={(e) => (e.target as any).showPicker?.()}
+                        onChange={(e) => {
+                          const val = e.target.value ? new Date(e.target.value).toISOString() : "";
+                          handleUpdate("flash", "endsAt", val);
+                        }}
+                        style={{ 
+                          width: "100%", 
+                          background: "rgba(255,255,255,0.03)", 
+                          border: "1px solid var(--border)", 
+                          padding: "12px 16px", 
+                          color: "#fff",
+                          fontSize: "13px",
+                          cursor: "pointer"
+                        }}
+                      />
+                      <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "8px" }}>Sélectionnez le moment précis où l'offre expire. Le compte à rebours s'ajustera automatiquement.</p>
                     </div>
                   </div>
                 </div>

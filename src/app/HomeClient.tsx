@@ -42,8 +42,14 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
   };
 
   const current = slides.length > 0 ? slides[slide] : null;
-  const saleTarget = activeSale?.ends_at ? new Date(activeSale.ends_at) : new Date(Date.now() + 18 * 3600000 + 44 * 60000 + 22000);
+  const saleTarget = landingContent?.flash?.endsAt 
+    ? new Date(landingContent.flash.endsAt) 
+    : (activeSale?.ends_at ? new Date(activeSale.ends_at) : new Date(Date.now() + 18 * 3600000 + 44 * 60000 + 22000));
   const visibleBrands = brands.slice(brandStart, brandStart + brandsPerPage);
+
+  // Determine the flash sale product link - prioritizing dashboard config, then common props
+  const flashProductId = landingContent?.flash?.productId || 
+    [...featuredProducts, ...saleProducts].find(p => p.name.toUpperCase().includes("OPTI-WOMEN"))?.id;
 
   return (
     <>
@@ -212,7 +218,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
       </section>
 
       {/* PROMO TICKER */}
-      <div className="promo-bar" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "var(--accent)", color: "#000" }}>
+      <div className="promo-bar" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: landingContent?.promo?.bgColor || "#FF51C5", color: landingContent?.promo?.textColor || "#000" }}>
         <div className="promo-wrap" style={{ overflow: "hidden", maxWidth: "100vw" }}>
           <div className="promo-inner" style={{ display: "inline-block", whiteSpace: "nowrap", padding: "10px 0" }}>
             {landingContent?.promo?.text || "OFFRE SPÉCIALE · JUSQU'À -40% · STOCKS LIMITÉS · OFFRE SPÉCIALE · JUSQU'À -40% · STOCKS LIMITÉS · OFFRE SPÉCIALE · JUSQU'À -40% · STOCKS LIMITÉS"}
@@ -221,7 +227,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
       </div>
 
       {/* FLASH SALE */}
-      <section style={{ background: "#0A0A0A", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "60px 0" }}>
+      <section style={{ background: landingContent?.flash?.bgColor || "#0A0A0A", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "60px 0" }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
           {/* Header: button left, label+heading right */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "20px" }}>
@@ -235,7 +241,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                  <span style={{ fontFamily: "var(--font-dm)", fontSize: "12px", fontWeight: 400, letterSpacing: "0.25em", color: "#ff3b3b" }}>OFFRE LIMITÉE</span>
                </div>
                <h2 className="section-heading" style={{ fontFamily: "var(--font-bebas)", fontSize: "clamp(28px, 4vw, 56px)", margin: 0, lineHeight: 0.9 }}>
-                 SOLDES<br /><span style={{ color: "var(--accent)" }}>SPÉCIAUX</span>
+                SOLDES<br /><span style={{ color: landingContent?.flash?.accentColor || "#FF51C5" }}>SPÉCIAUX</span>
                </h2>
              </div>
           </div>
@@ -256,7 +262,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
               top: "14px", 
               left: "61%", 
               transform: "translateX(-50%)", 
-              background: "#e6ff03ff", 
+              background: landingContent?.flash?.badgeColor || "#e6ff03ff", 
               color: "#000000ff", 
               padding: "4px 12px", 
               fontFamily: "var(--font-bebas)", 
@@ -264,7 +270,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
               fontSize: "14px", 
               letterSpacing: "0.05em",
               zIndex: 10,
-              boxShadow: "0 4px 12px rgba(177, 255, 59, 0.3)",
+              boxShadow: `0 4px 12px ${landingContent?.flash?.badgeColor ? landingContent.flash.badgeColor + '4d' : 'rgba(177, 255, 59, 0.3)'}`,
               borderRadius: "0"
             }}>
               -25%
@@ -287,8 +293,8 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                 <div style={{ width: "100%", paddingLeft: "32px", display: "flex", flexDirection: "column" }}>
                   <div className="flash-tagline" style={{ 
                     fontFamily: "var(--font-dm)", 
-                    fontSize: "11px", 
-                    color: "var(--accent)", 
+                    fontSize: "14px", 
+                    color: landingContent?.flash?.accentColor || "#FF51C5", 
                     fontWeight: 400, 
                     letterSpacing: "0.45em",
                     marginBottom: "8px",
@@ -334,13 +340,14 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                   </div>
                   
                   <div className="flash-cta-wrap" style={{ display: "flex", justifyContent: "flex-end", marginRight: "12px" }}>
-                    <Link href="/products" className="btn-accent" style={{ 
+                    <Link href={flashProductId ? `/products/${flashProductId}` : "/products"} className="btn-accent" style={{ 
                       padding: "16px 40px", 
                       borderRadius: "0", 
+                      background: landingContent?.flash?.accentColor || "#FF51C5",
                       textDecoration: "none", 
                       display: "inline-block",
                       fontSize: "14px",
-                      boxShadow: "0 10px 20px rgba(204, 255, 0, 0.15)"
+                      boxShadow: `0 10px 20px ${landingContent?.flash?.accentColor ? landingContent.flash.accentColor + '38' : 'rgba(255, 7, 210, 0.22)'}`
                     }}>
                       ACHETER MAINTENANT
                     </Link>
