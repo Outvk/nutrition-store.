@@ -174,7 +174,20 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
 
         {landingContent?.goals?.items && landingContent.goals.items.some((i: any) => i.image) && (
           <div style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
-            <div className="goals-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "3px", padding: 0 }}>
+            <style>{`
+              .local-goals-grid {
+                display: grid;
+                grid-template-columns: repeat(${landingContent.goals.items.filter((i: any) => i.image).length}, 1fr);
+                gap: 3px;
+                padding: 0;
+              }
+              @media (max-width: 768px) {
+                .local-goals-grid {
+                  grid-template-columns: repeat(2, 1fr) !important;
+                }
+              }
+            `}</style>
+            <div className="local-goals-grid">
               {landingContent.goals.items.filter((i: any) => i.image).map((item: any, idx: number) => (
                 <Link
                   key={idx}

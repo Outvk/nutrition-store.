@@ -503,20 +503,20 @@ export default function Navbar() {
 
       {/* Search Overlay - Moved outside nav for proper transparency when scrolled */}
       {searchOpen && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(10,10,10,0.7)", zIndex: 300, display: "flex", flexDirection: "column", padding: isMobile ? "20px" : "40px", backdropFilter: "blur(12px)" }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(10,10,10,0.7)", zIndex: 300, display: "flex", flexDirection: "column", padding: isMobile ? "12px" : "40px", backdropFilter: "blur(12px)" }}>
           <div style={{ maxWidth: "800px", margin: "0 auto", width: "100%", position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: isMobile ? "30px" : "50px" }}>
-              <Search size={isMobile ? 24 : 32} color="var(--accent)" />
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "20px", marginBottom: isMobile ? "20px" : "50px" }}>
+              <Search size={isMobile ? 20 : 32} color="var(--accent)" style={{ flexShrink: 0 }} />
               <input 
                 autoFocus
                 type="text" 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="NOM DU PRODUIT, MARQUE..." 
-                style={{ flex: 1, background: "none", border: "none", borderBottom: "2px solid var(--border)", padding: "16px 0", color: "#fff", fontSize: isMobile ? "20px" : "32px", fontFamily: "var(--font-condensed)", fontWeight: 700, outline: "none" }}
+                placeholder={isMobile ? "RECHERCHE..." : "NOM DU PRODUIT, MARQUE..."} 
+                style={{ flex: 1, minWidth: 0, background: "none", border: "none", borderBottom: "2px solid var(--border)", padding: isMobile ? "12px 0" : "16px 0", color: "#fff", fontSize: isMobile ? "16px" : "32px", fontFamily: "var(--font-condensed)", fontWeight: 700, outline: "none" }}
               />
-              <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: "10px" }}>
-                <X size={isMobile ? 28 : 40} />
+              <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} style={{ flexShrink: 0, background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: "8px" }}>
+                <X size={isMobile ? 24 : 40} />
               </button>
             </div>
 

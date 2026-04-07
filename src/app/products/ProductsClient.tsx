@@ -38,7 +38,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
 
   const [popularOnly, setPopularOnly] = useState(false);
   const [sortBy, setSortBy] = useState<"default" | "price-asc" | "price-desc">("default");
-  const [viewMode, setViewMode] = useState<"grid-3" | "grid-4" | "list">("grid-4");
+  const [viewMode, setViewMode] = useState<"grid-3" | "grid-4" | "list">("grid-3");
 
   const [openSection, setOpenSection] = useState<string | null>("category");
 

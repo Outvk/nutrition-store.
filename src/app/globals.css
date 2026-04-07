@@ -157,11 +157,14 @@ body {
     display: flex !important;
   }
   .hero-slide-arrows {
-    position: static !important;
-    transform: none !important;
+    position: absolute !important;
+    bottom: 80px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
     flex-direction: row !important;
-    margin-top: 10px;
+    margin-top: 0 !important;
     justify-content: center;
+    z-index: 10;
   }
   .product-images-sticky {
     position: relative !important;
@@ -638,11 +641,6 @@ body {
 @media (max-width: 768px) {
   .goals-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
-@media (max-width: 420px) {
-  .goals-grid {
-    grid-template-columns: 1fr !important;
   }
 }
 
