@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import Countdown from "@/components/Countdown";
 import { Product, Brand, Category, SaleEvent, LandingContent } from "@/types";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface HomeClientProps {
   featuredProducts: Product[];
@@ -20,6 +21,7 @@ interface HomeClientProps {
 
 
 export default function HomeClient({ featuredProducts, saleProducts, brands, categories, activeSale, landingContent }: HomeClientProps) {
+  const { t, locale } = useLanguage();
   const slides = landingContent?.hero?.slides || [];
   const [slide, setSlide] = useState(0);
   const [brandStart, setBrandStart] = useState(0);
@@ -76,8 +78,8 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
               {current.sub}
             </p>
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <Link href={current.href} className="btn-accent" style={{ padding: "14px 32px", borderRadius: "0px", textDecoration: "none", fontSize: "15px", display: "inline-block", fontFamily: "var(--font-alt)", fontWeight: 700 }}>
-                {current.cta}
+              <Link href={current.href} className="btn-accent" style={{ padding: "14px 32px", borderRadius: "0px", textDecoration: "none", fontSize: "15px", display: "inline-block", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontWeight: 700 }}>
+                {t("hero.cta")}
               </Link>
               <Link href="/products" className="glass-btn" style={{ 
                 padding: "14px 32px", 
@@ -85,16 +87,16 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                 textDecoration: "none", 
                 fontSize: "15px", 
                 display: "inline-block",
-                fontFamily: "var(--font-alt)",
+                fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)',
                 background: "rgba(255,255,255,0.08)",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
                 border: "1px solid rgba(255,255,255,0.3)",
                 color: "#fff",
-                fontWeight: 400,
+                fontWeight: 600,
                 letterSpacing: "0.02em"
               }}>
-                TOUS LES PRODUITS
+                {t("hero.allProducts")}
               </Link>
             </div>
 
@@ -141,8 +143,8 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
             <div>
-              <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--text-muted)", fontWeight: 600, marginBottom: "4px" }}>{landingContent?.brands?.label || "PARTENAIRES"}</p>
-              <h2 className="section-heading" style={{ fontSize: "32px" }}>{landingContent?.brands?.heading || "MARQUES UNIVERSELLES"}</h2>
+              <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.12em", color: "var(--text-muted)", fontWeight: 600, marginBottom: "4px" }}>{landingContent?.brands?.label || t("home.brandsLabel")}</p>
+              <h2 className="section-heading" style={{ fontSize: "32px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{landingContent?.brands?.heading || t("home.brandsHeading")}</h2>
             </div>
             <div style={{ display: "flex", gap: "8px" }}>
               <button onClick={() => setBrandStart(i => Math.max(0, i - 1))} className="btn-ghost" style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)", background: "none", cursor: "pointer", color: "var(--text-secondary)", display: "flex", alignItems: "center" }}>
@@ -172,9 +174,9 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
       {/* GOALS */}
       <section style={{ maxWidth: "1280px", margin: "0 auto", padding: "72px 24px 0", background: "#" }}>
         <div style={{ marginBottom: "40px" }}>
-          <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>{landingContent?.goals?.label || "CHOISISSEZ VOTRE VOIE"}</p>
-          <h2 className="section-heading" style={{ fontSize: "clamp(36px, 5vw, 52px)", color: "#ffff", whiteSpace: "pre-line" }}>
-            {landingContent?.goals?.heading || "QUEL EST VOTRE\nOBJECTIF ?"}
+          <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>{landingContent?.goals?.label || t("home.goalsLabel")}</p>
+          <h2 className="section-heading" style={{ fontSize: "clamp(36px, 5vw, 52px)", color: "#ffff", whiteSpace: "pre-line", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+            {landingContent?.goals?.heading || t("home.goalsHeading")}
           </h2>
         </div>
 
@@ -221,7 +223,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
       <div className="promo-bar" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: landingContent?.promo?.bgColor || "#FF51C5", color: landingContent?.promo?.textColor || "#000" }}>
         <div className="promo-wrap" style={{ overflow: "hidden", maxWidth: "100vw" }}>
           <div className="promo-inner" style={{ display: "inline-block", whiteSpace: "nowrap", padding: "10px 0" }}>
-            {landingContent?.promo?.text || "OFFRE SPÉCIALE · JUSQU'À -40% · STOCKS LIMITÉS · OFFRE SPÉCIALE · JUSQU'À -40% · STOCKS LIMITÉS · OFFRE SPÉCIALE · JUSQU'À -40% · STOCKS LIMITÉS"}
+            {landingContent?.promo?.text || `${t("home.promoText")} ${t("home.promoText")} ${t("home.promoText")}`}
           </div>
         </div>
       </div>
@@ -232,16 +234,16 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
           {/* Header: button left, label+heading right */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "20px" }}>
             <div style={{ flex: "0 0 auto" }}>
-              <Link href="/products?filter=sale" className="btn-ghost" style={{ padding: "13px 24px", borderRadius: "6px", textDecoration: "none", fontSize: "14px", display: "inline-block" }}>
-                VOIR TOUS LES SOLDES
+              <Link href="/products?filter=sale" className="btn-ghost" style={{ padding: "13px 24px", borderRadius: "6px", textDecoration: "none", fontSize: "14px", display: "inline-block", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+                {t("home.viewSales")}
               </Link>
             </div>
              <div className="mobile-text-center" style={{ textAlign: "right", flex: "1 1 320px" }}>
                <div style={{ marginBottom: "4px" }}>
-                 <span style={{ fontFamily: "var(--font-dm)", fontSize: "12px", fontWeight: 400, letterSpacing: "0.25em", color: "#ff3b3b" }}>OFFRE LIMITÉE</span>
+                 <span style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-dm)', fontSize: "12px", fontWeight: 400, letterSpacing: "0.25em", color: "#ff3b3b" }}>{t("home.flashLabel")}</span>
                </div>
-               <h2 className="section-heading" style={{ fontFamily: "var(--font-bebas)", fontSize: "clamp(28px, 4vw, 56px)", margin: 0, lineHeight: 0.9 }}>
-                SOLDES<br /><span style={{ color: landingContent?.flash?.accentColor || "#FF51C5" }}>SPÉCIAUX</span>
+               <h2 className="section-heading" style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-bebas)', fontSize: "clamp(28px, 4vw, 56px)", margin: 0, lineHeight: 0.9 }}>
+                {t("home.flashTitle")}<br /><span style={{ color: landingContent?.flash?.accentColor || "#FF51C5" }}>{t("home.flashSub")}</span>
                </h2>
              </div>
           </div>
@@ -347,9 +349,10 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                       textDecoration: "none", 
                       display: "inline-block",
                       fontSize: "14px",
+                      fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit',
                       boxShadow: `0 10px 20px ${landingContent?.flash?.accentColor ? landingContent.flash.accentColor + '38' : 'rgba(255, 7, 210, 0.22)'}`
                     }}>
-                      ACHETER MAINTENANT
+                      {t("home.buyNow")}
                     </Link>
                   </div>
                 </div>
@@ -369,7 +372,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
 
           {/* Expiry row moved under the big card */}
           <div className="mobile-stack" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "1280px", margin: "8px auto 24px", padding: "0 24px" }}>
-            <div style={{ fontSize: "14px", color: "var(--text-secondary)" , letterSpacing: "0.3em", textTransform: "uppercase" }}>L'offre expire dans</div>
+            <div style={{ fontSize: "14px", color: "var(--text-secondary)", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("home.offerExpires")}</div>
             <Countdown targetDate={saleTarget} />
           </div>
 
@@ -383,7 +386,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
         {/* Section Heading Discovery */}
         <div style={{ marginBottom: "52px", paddingLeft: "0px" }}>
           <p style={{ 
-            fontFamily: "var(--font-condensed)", 
+            fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', 
             fontSize: "10px", 
             letterSpacing: "0.21em", 
             color: "#dfff95ff", 
@@ -394,10 +397,10 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
             padding: "4px 12px",
             textTransform: "uppercase"
           }}>
-            {landingContent?.featured?.label || "EXCLUSIVITÉS NOEST"}
+            {landingContent?.featured?.label || t("home.featuredLabel")}
           </p>
-          <h2 className="section-heading" style={{ fontSize: "clamp(32px, 5vw, 42px)", lineHeight: "1.1", color: "#000", whiteSpace: "pre-line" }}>
-            {landingContent?.featured?.heading || "TOP SELLING\nWORTH THE HYPE"}
+          <h2 className="section-heading" style={{ fontSize: "clamp(32px, 5vw, 42px)", lineHeight: "1.1", color: "#000", whiteSpace: "pre-line", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+            {landingContent?.featured?.heading || t("home.featuredHeading")}
           </h2>
         </div>
 
@@ -424,11 +427,11 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                 className="fade-in"
               />
               <div className="featured-visual-overlay">
-                <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.2em", color: "var(--accent)", fontWeight: 700, marginBottom: "8px" }}>
-                  {activeTab === "worth" ? "EDITION 2024" : "OFFRE LIMITÉE"}
+                <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.2em", color: "var(--accent)", fontWeight: 700, marginBottom: "8px" }}>
+                  {activeTab === "worth" ? t("home.edition") : t("home.limitedOffer")}
                 </p>
-                <h2 className="section-heading" style={{ color: "#fff", lineHeight: "1" }}>
-                  {activeTab === "worth" ? "NOEST-DZ\nEXCLUSIVE" : "MEGA\nSOLDE DZ"}
+                <h2 className="section-heading" style={{ color: "#fff", lineHeight: "1", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+                  {activeTab === "worth" ? (locale === 'ar' ? 'NOEST-DZ\nحصري' : "NOEST-DZ\nEXCLUSIVE") : (locale === 'ar' ? 'ميغا\nتخفيضات' : "MEGA\nSOLDE DZ")}
                 </h2>
                 <div style={{ width: "40px", height: "2px", background: "var(--accent)", marginTop: "20px" }} />
               </div>
@@ -468,7 +471,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                   </button>
                 ))}
               </div>
-              <Link href="/products" className="underline-btn mobile-hide">VOIR TOUT</Link>
+              <Link href="/products" className="underline-btn mobile-hide" style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("home.viewAll")}</Link>
             </div>
 
             <div className="mobile-grid-2" style={{ 
@@ -484,7 +487,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
 
             {/* Mobile-only CTA */}
             <div className="mobile-show" style={{ justifyContent: "center", marginTop: "32px" }}>
-              <Link href="/products" className="underline-btn" style={{ padding: "10px 20px" }}>VOIR TOUT LES PRODUITS</Link>
+              <Link href="/products" className="underline-btn" style={{ padding: "10px 20px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("home.viewAllMobile")}</Link>
             </div>
           </div>
         </div>
@@ -501,27 +504,27 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "3px", marginBottom: "40px" }}>
             {[
-              { icon: Zap, title: "Livraison Express", desc: "Expédition sous 24h ouvrées. Suivi en temps réel dès la confirmation." },
-              { icon: Truck, title: "Partout en Algérie", desc: "Nous livrons dans les 58 wilayas. Délai : 2 à 5 jours." },
-              { icon: Package, title: "Emballage Sécurisé", desc: "Chaque produit conditionné pour garantir son intégrité." },
-              { icon: Shield, title: "Produits Authentiques", desc: "100% originaux, importés directement des fabricants." },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0", padding: "24px", transition: "border-color 0.2s ease" }}
+              { icon: Zap, key: "express" },
+              { icon: Truck, key: "nationwide" },
+              { icon: Package, key: "packing" },
+              { icon: Shield, key: "authentic" },
+            ].map(({ icon: Icon, key }) => (
+              <div key={key} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0", padding: "24px", transition: "border-color 0.2s ease", textAlign: locale === 'ar' ? 'right' : 'left' }}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--accent)")}
                 onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--border)")}
               >
-                <div style={{ width: "40px", height: "40px", background: "rgba(232,255,0,0.08)", border: "1px solid rgba(232,255,0,0.2)", borderRadius: "0", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+                <div style={{ width: "40px", height: "40px", background: "rgba(232,255,0,0.08)", border: "1px solid rgba(232,255,0,0.2)", borderRadius: "0", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px", marginLeft: locale === 'ar' ? 'auto' : '0' }}>
                   <Icon size={20} color="var(--accent)" />
                 </div>
-                <h3 style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "17px", letterSpacing: "0.04em", marginBottom: "8px" }}>{title}</h3>
-                <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.6 }}>{desc}</p>
+                <h3 style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, fontSize: "17px", letterSpacing: "0.04em", marginBottom: "8px" }}>{t(`home.features.${key}.title` as any)}</h3>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.6, fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t(`home.features.${key}.desc` as any)}</p>
               </div>
             ))}
           </div>
           <div style={{ textAlign: "center", padding: "24px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "8px" }}>
-            <p style={{ fontFamily: "var(--font-condensed)", fontSize: "15px", letterSpacing: "0.06em", color: "var(--text-secondary)", marginBottom: "4px" }}>LIVRAISON ASSURÉE PAR</p>
+            <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "15px", letterSpacing: "0.06em", color: "var(--text-secondary)", marginBottom: "4px" }}>{t("home.deliveryCarrier")}</p>
             <span style={{ fontFamily: "var(--font-display)", fontSize: "32px", letterSpacing: "0.08em", color: "var(--accent)" }}>NOEST-DZ</span>
-            <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "8px" }}>Paiement à la livraison disponible</p>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "8px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("home.deliveryCOD")}</p>
           </div>
         </div>
       </section>

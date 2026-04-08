@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Product, Brand, Category } from "@/types";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ProductsClientProps {
   initialProducts: Product[];
@@ -16,6 +17,7 @@ interface ProductsClientProps {
 
 export default function ProductsClient({ initialProducts, total, brands, categories }: ProductsClientProps) {
   const router = useRouter();
+  const { t, locale } = useLanguage();
   const searchParams = useSearchParams();
 
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -63,26 +65,26 @@ export default function ProductsClient({ initialProducts, total, brands, categor
       
       {/* Filter Card: Prix */}
       <div style={{ marginBottom: "20px" }}>
-        <h3 style={{ fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-condensed)", letterSpacing: "0.1em", color: "#fff", marginBottom: "8px" }}>PRIX</h3>
+        <h3 style={{ fontSize: "13px", fontWeight: 700, fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', letterSpacing: "0.1em", color: "#fff", marginBottom: "8px" }}>{t("listing.priceRange")}</h3>
         <div style={{ border: "1px solid var(--border)", background: openSection === "price" ? "rgba(232,255,0,0.02)" : "transparent" }}>
           <button onClick={() => setOpenSection(openSection === "price" ? null : "price")}
             style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.02)", border: "none", color: "#fff", cursor: "pointer", padding: "14px 16px" }}>
-            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700 }}>{openSection === "price" ? "FERMER" : "SÉLECTIONNER"}</span>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700 }}>{openSection === "price" ? (locale === 'ar' ? 'إغلاق' : 'FERMER') : (locale === 'ar' ? 'اختر' : 'SÉLECTIONNER')}</span>
             <ChevronDown size={14} style={{ color: openSection === "price" ? "var(--accent)" : "inherit", transform: openSection === "price" ? "rotate(180deg)" : "none", transition: "0.2s" }} />
           </button>
           {openSection === "price" && (
             <div style={{ padding: "0 16px 16px", borderTop: "1px solid var(--border)" }}>
               <div style={{ padding: "12px 0 8px" }}>
-                <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700, letterSpacing: "0.08em" }}>TRIER PAR PRIX</span>
+                <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, letterSpacing: "0.08em" }}>{t("listing.sortBy")}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 {[
-                  { val: "default", label: "Par défaut" },
-                  { val: "price-asc", label: "Prix croissant" },
-                  { val: "price-desc", label: "Prix décroissant" },
+                  { val: "default", label: t("listing.sortOptions.newest") },
+                  { val: "price-asc", label: t("listing.sortOptions.priceAsc") },
+                  { val: "price-desc", label: t("listing.sortOptions.priceDesc") },
                 ].map(opt => (
                   <button key={opt.val} onClick={() => setSortBy(opt.val as any)}
-                    style={{ textAlign: "left", background: "none", border: "none", color: sortBy === opt.val ? "var(--accent)" : "var(--text-secondary)", fontSize: "13px", padding: "8px 0", cursor: "pointer", fontFamily: "var(--font-condensed)", fontWeight: sortBy === opt.val ? 700 : 400 }}>
+                    style={{ textAlign: "left", background: "none", border: "none", color: sortBy === opt.val ? "var(--accent)" : "var(--text-secondary)", fontSize: "13px", padding: "8px 0", cursor: "pointer", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: sortBy === opt.val ? 700 : 400 }}>
                     {opt.label.toUpperCase()}
                   </button>
                 ))}
@@ -94,7 +96,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
 
       {/* Quick Toggle: Sales */}
       <div style={{ marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
-        <span style={{ fontSize: "11px", fontWeight: 700, fontFamily: "var(--font-condensed)", color: onSaleOnly ? "#fff" : "var(--text-secondary)", letterSpacing: "0.1em" }}>PRODUITS EN SOLDE</span>
+        <span style={{ fontSize: "11px", fontWeight: 700, fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', color: onSaleOnly ? "#fff" : "var(--text-secondary)", letterSpacing: "0.1em" }}>{t("nav.sale")}</span>
         <button onClick={() => setOnSaleOnly(!onSaleOnly)} 
           style={{ width: "36px", height: "20px", background: onSaleOnly ? "var(--accent)" : "rgba(255,255,255,0.05)", borderRadius: "0px", border: `1px solid ${onSaleOnly ? "var(--accent)" : "var(--border)"}`, position: "relative", cursor: "pointer", transition: "all 0.3s ease", padding: 0 }}>
           <div style={{ position: "absolute", top: "50%", left: onSaleOnly ? "calc(100% - 16px)" : "2px", transform: "translateY(-50%)", width: "14px", height: "14px", background: onSaleOnly ? "#000" : "var(--text-muted)", borderRadius: "0%", transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)" }} />
@@ -103,17 +105,17 @@ export default function ProductsClient({ initialProducts, total, brands, categor
 
       {/* Filter Card: Sous-catégorie */}
       <div style={{ marginBottom: "20px" }}>
-        <h3 style={{ fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-condensed)", letterSpacing: "0.1em", color: "#fff", marginBottom: "8px" }}>SOUS-CATÉGORIE</h3>
+        <h3 style={{ fontSize: "13px", fontWeight: 700, fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', letterSpacing: "0.1em", color: "#fff", marginBottom: "8px" }}>{t("nav.categories")}</h3>
         <div style={{ border: "1px solid var(--border)", background: openSection === "category" ? "rgba(232,255,0,0.02)" : "transparent" }}>
           <button onClick={() => setOpenSection(openSection === "category" ? null : "category")}
             style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.02)", border: "none", color: "#fff", cursor: "pointer", padding: "14px 16px" }}>
-            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700 }}>{openSection === "category" ? "FERMER" : "SÉLECTIONNER"}</span>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700 }}>{openSection === "category" ? (locale === 'ar' ? 'إغلاق' : 'FERMER') : (locale === 'ar' ? 'اختر' : 'SÉLECTIONNER')}</span>
             <ChevronDown size={14} style={{ color: openSection === "category" ? "var(--accent)" : "inherit", transform: openSection === "category" ? "rotate(180deg)" : "none", transition: "0.2s" }} />
           </button>
           {openSection === "category" && (
             <div style={{ padding: "0 16px 16px", borderTop: "1px solid var(--border)" }}>
               <div style={{ padding: "12px 0 8px" }}>
-                <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700, letterSpacing: "0.08em" }}>BOUTIQUE / CATÉGORIES</span>
+                <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, letterSpacing: "0.08em" }}>{t("nav.categories")}</span>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 <button onClick={() => setSelectedCategory(null)}
@@ -121,8 +123,8 @@ export default function ProductsClient({ initialProducts, total, brands, categor
                     background: !selectedCategory ? "var(--accent)" : "rgba(255,255,255,0.03)",
                     color: !selectedCategory ? "#000" : "#fff",
                     border: "1px solid var(--border)", padding: "6px 12px", fontSize: "11px",
-                    fontFamily: "var(--font-condensed)", fontWeight: 700, cursor: "pointer", borderRadius: "0px"
-                  }}>TOUTS</button>
+                    fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, cursor: "pointer", borderRadius: "0px"
+                  }}>{locale === 'ar' ? 'الكل' : 'TOUS'}</button>
                 {categories.map(cat => (
                   <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
                     style={{
@@ -130,7 +132,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
                       color: selectedCategory === cat.id ? "#000" : "var(--text-secondary)",
                       border: `1px solid ${selectedCategory === cat.id ? "var(--accent)" : "var(--border)"}`,
                       padding: "6px 12px", fontSize: "11px",
-                      fontFamily: "var(--font-condensed)", fontWeight: 700, cursor: "pointer", borderRadius: "0px",
+                      fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, cursor: "pointer", borderRadius: "0px",
                       transition: "all 0.15s ease"
                     }}>
                     {cat.name.toUpperCase()}
@@ -144,17 +146,17 @@ export default function ProductsClient({ initialProducts, total, brands, categor
 
       {/* Filter Card: Marque */}
       <div style={{ marginBottom: "20px" }}>
-        <h3 style={{ fontSize: "13px", fontWeight: 700, fontFamily: "var(--font-condensed)", letterSpacing: "0.1em", color: "#fff", marginBottom: "8px" }}>MARQUE</h3>
+        <h3 style={{ fontSize: "13px", fontWeight: 700, fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', letterSpacing: "0.1em", color: "#fff", marginBottom: "8px" }}>{t("nav.brands_label")}</h3>
         <div style={{ border: "1px solid var(--border)", background: openSection === "brand" ? "rgba(232,255,0,0.02)" : "transparent" }}>
           <button onClick={() => setOpenSection(openSection === "brand" ? null : "brand")}
             style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.02)", border: "none", color: "#fff", cursor: "pointer", padding: "14px 16px" }}>
-            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700 }}>{openSection === "brand" ? "FERMER" : "SÉLECTIONNER"}</span>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700 }}>{openSection === "brand" ? (locale === 'ar' ? 'إغلاق' : 'FERMER') : (locale === 'ar' ? 'اختر' : 'SÉLECTIONNER')}</span>
             <ChevronDown size={14} style={{ color: openSection === "brand" ? "var(--accent)" : "inherit", transform: openSection === "brand" ? "rotate(180deg)" : "none", transition: "0.2s" }} />
           </button>
           {openSection === "brand" && (
             <div style={{ padding: "0 16px 16px", borderTop: "1px solid var(--border)" }}>
               <div style={{ padding: "12px 0 8px" }}>
-                <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700, letterSpacing: "0.08em" }}>BOUTIQUE / MARQUES</span>
+                <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, letterSpacing: "0.08em" }}>{t("nav.brands_label")}</span>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 <button onClick={() => setSelectedBrand(null)}
@@ -162,8 +164,8 @@ export default function ProductsClient({ initialProducts, total, brands, categor
                     background: !selectedBrand ? "var(--accent)" : "rgba(255,255,255,0.03)",
                     color: !selectedBrand ? "#000" : "#fff",
                     border: "1px solid var(--border)", padding: "6px 12px", fontSize: "11px",
-                    fontFamily: "var(--font-condensed)", fontWeight: 700, cursor: "pointer", borderRadius: "0px"
-                  }}>TOUTS</button>
+                    fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, cursor: "pointer", borderRadius: "0px"
+                  }}>{locale === 'ar' ? 'الكل' : 'TOUS'}</button>
                 {brands.map(brand => (
                   <button key={brand.id} onClick={() => setSelectedBrand(brand.id)}
                     style={{
@@ -171,7 +173,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
                       color: selectedBrand === brand.id ? "#000" : "var(--text-secondary)",
                       border: `1px solid ${selectedBrand === brand.id ? "var(--accent)" : "var(--border)"}`,
                       padding: "6px 12px", fontSize: "11px",
-                      fontFamily: "var(--font-condensed)", fontWeight: 700, cursor: "pointer", borderRadius: "0px",
+                      fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, cursor: "pointer", borderRadius: "0px",
                       transition: "all 0.15s ease"
                     }}>
                     {brand.name.toUpperCase()}
@@ -189,7 +191,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
           <div style={{ width: "18px", height: "18px", border: `2px solid ${popularOnly ? "var(--accent)" : "var(--border-bright)"}`, background: popularOnly ? "var(--accent)" : "transparent", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {popularOnly && <span style={{ color: "#000", fontSize: "12px", fontWeight: 800 }}>✓</span>}
           </div>
-          <span style={{ fontSize: "13px", color: popularOnly ? "#fff" : "var(--text-secondary)" }}>Produits populaires</span>
+          <span style={{ fontSize: "13px", color: popularOnly ? "#fff" : "var(--text-secondary)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{locale === 'ar' ? 'المنتجات الشائعة' : 'Produits populaires'}</span>
         </button>
       </div>
 
@@ -203,8 +205,8 @@ export default function ProductsClient({ initialProducts, total, brands, categor
       {/* Banner */}
       <div style={{ height: "300px", background: "linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://png.pngtree.com/thumb_back/fh260/background/20230527/pngtree-black-gym-with-heavy-weights-image_2687614.jpg')", backgroundSize: "cover", backgroundPosition: "center", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
         <div>
-          <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.2em", color: "var(--accent)", fontWeight: 700, marginBottom: "8px" }}>CATALOGUE EXCLUSIF</p>
-          <h1 className="section-heading" style={{ fontSize: "clamp(32px, 6vw, 64px)", color: "#fff" }}>TOUS LES <span style={{ color: "var(--accent)" }}>PRODUITS</span></h1>
+          <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.2em", color: "var(--accent)", fontWeight: 700, marginBottom: "8px" }}>{locale === 'ar' ? 'كتالوج حصري' : 'CATALOGUE EXCLUSIF'}</p>
+          <h1 className="section-heading" style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit', fontSize: "clamp(32px, 6vw, 64px)", color: "#fff" }}>{locale === 'ar' ? 'جميع' : 'TOUS LES'} <span style={{ color: "var(--accent)" }}>{t("nav.products")}</span></h1>
         </div>
       </div>
 
@@ -234,20 +236,20 @@ export default function ProductsClient({ initialProducts, total, brands, categor
               marginRight: "-1px"
             }}>
               <h2 style={{ 
-                fontFamily: "var(--font-condensed)", 
+                fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', 
                 fontSize: "14px", 
                 fontWeight: 800, 
                 letterSpacing: "0.15em", 
                 color: "#fff",
                 margin: 0
-              }}>FILTRES</h2>
+              }}>{t("listing.filters")}</h2>
               <button onClick={resetFilters}
                 style={{ 
                   background: "rgba(255,255,255,0.03)", 
                   border: "1px solid var(--border)", 
                   color: "var(--accent)", 
                   fontSize: "10px", 
-                  fontFamily: "var(--font-condensed)", 
+                  fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', 
                   letterSpacing: "0.04em", 
                   cursor: "pointer", 
                   padding: "6px 12px",
@@ -256,7 +258,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; }}>
-                RÉINITIALISER
+                {t("listing.clearFilters")}
               </button>
             </div>
             
@@ -268,7 +270,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
           {/* Grid */}
           <main>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", borderBottom: "1px solid var(--border)", paddingBottom: "16px" }}>
-              <span style={{ fontSize: "13px", color: "var(--text-muted)", letterSpacing: "0.04em", fontWeight: 700 }}>{filtered.length} PRODUITS DISPONIBLES</span>
+              <span style={{ fontSize: "13px", color: "var(--text-muted)", letterSpacing: "0.04em", fontWeight: 700, fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{filtered.length} {t("listing.results")}</span>
               
               <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
                 {/* View Mode Buttons (Segmented Control) */}
@@ -305,16 +307,16 @@ export default function ProductsClient({ initialProducts, total, brands, categor
                 <button 
                   onClick={() => setFiltersOpen(!filtersOpen)} 
                   className="mobile-show btn-ghost" 
-                  style={{ display: "flex", alignItems: "center", gap: "8px", border: "1px solid var(--border)", padding: "8px 16px", borderRadius: "4px" }}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", border: "1px solid var(--border)", padding: "8px 16px", borderRadius: "4px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}
                 >
-                  <SlidersHorizontal size={16} /> FILTRER
+                  <SlidersHorizontal size={16} /> {t("listing.filters")}
                 </button>
               </div>
             </div>
 
             {filtered.length === 0 ? (
               <div style={{ textAlign: "center", padding: "100px 0" }}>
-                <p style={{ fontFamily: "var(--font-condensed)", fontSize: "20px", color: "var(--text-muted)" }}>AUCUN PRODUIT NE CORRESPOND À VOS CRITÈRES</p>
+                <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "20px", color: "var(--text-muted)" }}>{t("listing.noProducts")}</p>
               </div>
             ) : (
               <div style={{ 
@@ -345,13 +347,13 @@ export default function ProductsClient({ initialProducts, total, brands, categor
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                 <h2 style={{ fontFamily: "var(--font-condensed)", fontSize: "24px", fontWeight: 800 }}>FILTRES</h2>
-                 <button onClick={resetFilters} style={{ background: "none", border: "1px solid var(--accent)", color: "var(--accent)", fontSize: "10px", padding: "4px 8px", cursor: "pointer"}}>RÉINITIALISER</button>
+                 <h2 style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "24px", fontWeight: 800 }}>{t("listing.filters")}</h2>
+                 <button onClick={resetFilters} style={{ background: "none", border: "1px solid var(--accent)", color: "var(--accent)", fontSize: "10px", padding: "4px 8px", cursor: "pointer", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit'}}>{t("listing.clearFilters")}</button>
                </div>
                <button onClick={() => setFiltersOpen(false)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}><X size={32} /></button>
             </div>
             <FilterPanel />
-            <button onClick={() => setFiltersOpen(false)} className="btn-accent" style={{ width: "100%", marginTop: "40px", padding: "16px", cursor: "pointer" }}>VOIR LES RÉSULTATS</button>
+            <button onClick={() => setFiltersOpen(false)} className="btn-accent" style={{ width: "100%", marginTop: "40px", padding: "16px", cursor: "pointer", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{locale === 'ar' ? 'عرض النتائج' : 'VOIR LES RÉSULTATS'}</button>
           </div>
           {/* Backdrop */}
           <div onClick={() => setFiltersOpen(false)} style={{ 

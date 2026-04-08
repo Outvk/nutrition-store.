@@ -9,12 +9,10 @@ import ProductCard from "@/components/ProductCard";
 import { Product } from "@/types";
 import { algeriaWilayas } from "@/lib/algeria-data";
 import { addToCart } from "@/lib/cart";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 import { STORE_CONFIG } from "@/lib/config";
-
 import { createClient as createSupabaseClient } from "@/lib/supabase/client";
-
-// Delivery fees are now fetched dynamically from Supabase RPC get_delivery_fee
 
 interface ProductDetailClientProps {
   product: Product;
@@ -22,6 +20,7 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
+  const { t, locale } = useLanguage();
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null);
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
@@ -97,10 +96,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px" }}>
 
         {/* Breadcrumb */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px" }}>
-          <Link href="/" style={{ fontSize: "13px", color: "var(--text-muted)", textDecoration: "none" }}>Accueil</Link>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+          <Link href="/" style={{ fontSize: "13px", color: "var(--text-muted)", textDecoration: "none" }}>{t("nav.home")}</Link>
           <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>/</span>
-          <Link href="/products" style={{ fontSize: "13px", color: "var(--text-muted)", textDecoration: "none" }}>Produits</Link>
+          <Link href="/products" style={{ fontSize: "13px", color: "var(--text-muted)", textDecoration: "none" }}>{t("nav.products")}</Link>
           <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>/</span>
           <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>{product.name}</span>
         </div>
@@ -151,17 +150,17 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             </h1>
 
             {/* Info Line */}
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px", marginBottom: "20px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
               {product.brand?.name && (
                 <div style={{ display: "flex", gap: "4px", fontSize: "13px" }}>
-                  <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>Marque:</span>
+                  <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>{t("common.brand")}</span>
                   <span style={{ color: "#fff", fontWeight: 700 }}>{product.brand.name}</span>
                 </div>
               )}
               <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--border-bright)" }} />
               {product.category?.name && (
                 <div style={{ display: "flex", gap: "4px", fontSize: "13px" }}>
-                  <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>Catégorie:</span>
+                  <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>{t("common.category")}</span>
                   <span style={{ color: "var(--accent)", fontWeight: 700 }}>{product.category.name}</span>
                 </div>
               )}
@@ -169,12 +168,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               {totalStock > 0 ? (
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                   <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e" }} />
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: "#22c55e" }}>DISPONIBLE</span>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: "#22c55e" }}>{t("common.stock").toUpperCase()}</span>
                 </div>
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                   <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444" }} />
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: "#ef4444" }}>ÉPUISÉ</span>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: "#ef4444" }}>{t("common.outOfStock").toUpperCase()}</span>
                 </div>
               )}
             </div>
@@ -195,17 +194,17 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             <div style={{ marginBottom: "28px" }}>
               <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid var(--border)", marginBottom: "16px" }}>
                 {[
-                  { id: "description", label: "DESCRIPTION" },
-                  { id: "bienfaits", label: "BIENFAITS" },
-                  { id: "utilisation", label: "UTILISATION" },
-                  { id: "ingredients", label: "INGRÉDIENTS" }
+                  { id: "description", label: t("common.description") },
+                  { id: "bienfaits", label: t("common.benefits") },
+                  { id: "utilisation", label: t("common.usage") },
+                  { id: "ingredients", label: locale === 'ar' ? 'المكونات' : 'INGRÉDIENTS' }
                 ].map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     style={{
                       padding: "12px 0", border: "none", background: "none", cursor: "pointer",
-                      fontFamily: "var(--font-condensed)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em",
+                      fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: locale === 'ar' ? "14px" : "12px", fontWeight: 700, letterSpacing: "0.06em",
                       color: activeTab === tab.id ? "var(--accent)" : "var(--text-muted)",
                       borderBottom: `2px solid ${activeTab === tab.id ? "var(--accent)" : "transparent"}`,
                       transition: "all 0.2s ease",
@@ -296,11 +295,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   flex: 1, padding: "14px 24px", borderRadius: "0", border: "none", 
                   cursor: (added || !selectedVariant || selectedVariant.stock === 0) ? "not-allowed" : "pointer", 
                   fontSize: "15px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
-                  opacity: (added || !selectedVariant || selectedVariant.stock === 0) ? 0.6 : 1
+                  opacity: (added || !selectedVariant || selectedVariant.stock === 0) ? 0.6 : 1,
+                  fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit'
                 }}
               >
                 <ShoppingCart size={18} />
-                {selectedVariant && selectedVariant.stock === 0 ? "ÉPUISÉ" : added ? "AJOUTÉ ✓" : "AJOUTER AU PANIER"}
+                {selectedVariant && selectedVariant.stock === 0 ? t("common.outOfStock").toUpperCase() : added ? (locale === 'ar' ? "تمت الإضافة ✓" : "AJOUTÉ ✓") : t("common.addToCart")}
               </button>
             </div>
 
@@ -309,7 +309,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", 
                 padding: "14px 24px", borderRadius: "0", background: "transparent", 
                 border: "1px solid var(--border-bright)", textDecoration: "none", 
-                color: "var(--text-primary)", fontFamily: "var(--font-condensed)", 
+                color: "var(--text-primary)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', 
                 fontWeight: 700, fontSize: "15px", letterSpacing: "0.06em", 
                 marginBottom: "28px", transition: "all 0.2s ease",
                 opacity: (selectedVariant && selectedVariant.stock > 0) ? 1 : 0.5,
@@ -318,7 +318,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               onMouseEnter={e => { if (selectedVariant && selectedVariant.stock > 0) { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; } }}
               onMouseLeave={e => { if (selectedVariant && selectedVariant.stock > 0) { e.currentTarget.style.borderColor = "var(--border-bright)"; e.currentTarget.style.color = "var(--text-primary)"; } }}
             >
-              <Zap size={16} /> COMMANDER MAINTENANT
+              <Zap size={16} /> {t("common.buyNow")}
             </Link>
 
             {/* Guarantees */}
@@ -339,10 +339,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </div>
 
         {/* Achat Rapide & Infos */}
-        <div className="responsive-grid-split" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(30px, 6vw, 60px)", marginBottom: "80px", paddingTop: "60px", borderTop: "1px solid var(--border)" }}>
+        <div className="responsive-grid-split" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(30px, 6vw, 60px)", marginBottom: "80px", paddingTop: "60px", borderTop: "1px solid var(--border)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
           {/* Achat Rapide Form */}
           <div style={{ background: "var(--bg-secondary)", borderRadius: "0", padding: "32px", border: "1px solid var(--border)", position: "relative" }}>
-            <h2 style={{ fontFamily: "var(--font-condensed)", fontSize: "24px", fontWeight: 700, letterSpacing: "0.04em", marginBottom: "24px", color: "#fff" }}>ACHAT RAPIDE</h2>
+            <h2 style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "24px", fontWeight: 700, letterSpacing: "0.04em", marginBottom: "24px", color: "#fff" }}>{t("common.quickOrder")}</h2>
             
             {!selectedVariant || selectedVariant.stock === 0 ? (
               <div style={{ padding: "40px 20px", textAlign: "center", background: "rgba(239, 68, 68, 0.05)", border: "1px dashed #ef4444", borderRadius: "0" }}>
@@ -354,7 +354,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 <div style={{ width: "64px", height: "64px", borderRadius: "0", background: "rgba(34, 197, 94, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
                   <Shield size={32} color="#22c55e" />
                 </div>
-                <h3 style={{ fontFamily: "var(--font-display)", fontSize: "24px", color: "#22c55e", marginBottom: "12px" }}>COMMANDE RÉUSSIE !</h3>
+                <h3 style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-display)', fontSize: "24px", color: "#22c55e", marginBottom: "12px" }}>{t("common.form.orderSuccess").toUpperCase()}</h3>
                 <p style={{ color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: "24px" }}>
                   Merci pour votre confiance. Notre équipe vous contactera très prochainement pour confirmer la livraison.
                 </p>
@@ -420,23 +420,20 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
 
                 <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "16px" }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>Nom</label>
-                    <input required type="text" value={nom} onChange={e => setNom(e.target.value)} className="input-dark" style={{ width: "100%", padding: "12px 16px", borderRadius: "0", border: "1px solid var(--border)" }} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>Prénom</label>
-                    <input required type="text" value={prenom} onChange={e => setPrenom(e.target.value)} className="input-dark" style={{ width: "100%", padding: "12px 16px", borderRadius: "0", border: "1px solid var(--border)" }} />
+                    <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>{t("common.form.fullName")}</label>
+                    <input required type="text" value={nom} onChange={e => setNom(e.target.value)} placeholder="Nom" className="input-dark" style={{ width: "100%", padding: "12px 16px", borderRadius: "0", border: "1px solid var(--border)", marginBottom: "8px" }} />
+                    <input required type="text" value={prenom} onChange={e => setPrenom(e.target.value)} placeholder="Prénom" className="input-dark" style={{ width: "100%", padding: "12px 16px", borderRadius: "0", border: "1px solid var(--border)" }} />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>Téléphone (ex: 0555123456)</label>
+                  <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>{t("common.form.phone")}</label>
                   <input required pattern="^(05|06|07)[0-9]{8}$" type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="input-dark" style={{ width: "100%", padding: "12px 16px", borderRadius: "0", border: "1px solid var(--border)" }} />
                 </div>
 
                 <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "16px" }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>Wilaya</label>
+                    <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>{t("common.form.wilaya")}</label>
                     <select
                       required
                       value={selectedWilaya}
@@ -451,7 +448,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                     </select>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>Commune</label>
+                    <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>{t("common.form.commune")}</label>
                     <select
                       required
                       value={commune}
@@ -460,7 +457,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                       disabled={!selectedWilaya}
                       style={{ width: "100%", padding: "12px 16px", borderRadius: "0", border: "1px solid var(--border)", opacity: selectedWilaya ? 1 : 0.5 }}
                     >
-                      <option value="">{selectedWilaya ? "Choisir" : "Attente..."}</option>
+                      <option value="">{selectedWilaya ? (locale === 'ar' ? 'اختر البلدية' : 'Choisir') : (locale === 'ar' ? 'بانتظار الولاية...' : 'Attente...')}</option>
                       {selectedWilaya && algeriaWilayas.find(w => w.code === selectedWilaya)?.communes.map((c, i) => (
                         <option key={`${i}-${c}`} value={c}>{c}</option>
                       ))}
@@ -469,30 +466,30 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 </div>
 
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>Adresse complète</label>
+                  <label style={{ display: "block", fontSize: "12px", color: "var(--text-muted)", marginBottom: "6px" }}>{t("common.form.address")}</label>
                   <input required minLength={5} type="text" value={adresse} onChange={e => setAdresse(e.target.value)} className="input-dark" style={{ width: "100%", padding: "12px 16px", borderRadius: "0", border: "1px solid var(--border)" }} />
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "16px", marginTop: "8px" }}>
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px", border: `1px solid ${livraisonType === 'domicile' ? 'var(--accent)' : 'var(--border)'}`, borderRadius: "0", cursor: "pointer", background: livraisonType === 'domicile' ? "rgba(232, 255, 0, 0.05)" : "transparent" }}>
                     <input type="radio" value="domicile" checked={livraisonType === 'domicile'} onChange={e => setLivraisonType(e.target.value)} style={{ accentColor: "var(--accent)" }} />
-                    <span style={{ fontSize: "14px", color: "var(--text-primary)" }}>Livraison à domicile</span>
+                    <span style={{ fontSize: "14px", color: "var(--text-primary)" }}>{t("common.form.domicile")}</span>
                   </label>
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px", border: `1px solid ${livraisonType === 'stopdesk' ? 'var(--accent)' : 'var(--border)'}`, borderRadius: "0", cursor: "pointer", background: livraisonType === 'stopdesk' ? "rgba(232, 255, 0, 0.05)" : "transparent" }}>
                     <input type="radio" value="stopdesk" checked={livraisonType === 'stopdesk'} onChange={e => setLivraisonType(e.target.value)} style={{ accentColor: "var(--accent)" }} />
-                    <span style={{ fontSize: "14px", color: "var(--text-primary)" }}>Stop Desk</span>
+                    <span style={{ fontSize: "14px", color: "var(--text-primary)" }}>{t("common.form.stopdesk")}</span>
                   </label>
                 </div>
 
                 <div style={{ padding: "16px", background: "var(--bg-card)", borderRadius: "0", marginTop: "8px", border: "1px solid var(--border)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                    <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Total produit:</span>
-                    <span style={{ fontSize: "14px", fontWeight: 700 }}>{((product.sale_price || product.price) * qty).toLocaleString()} DA</span>
+                    <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>{locale === 'ar' ? 'مجموع المنتجات:' : 'Total produit:'}</span>
+                    <span style={{ fontSize: "14px", fontWeight: 700 }}>{((product.sale_price || product.price) * qty).toLocaleString()} {t("common.da")}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Frais de livraison:</span>
+                    <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>{t("common.deliveryFees")}:</span>
                     <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--accent)" }}>
-                      {loadingFee ? "Calcul..." : (selectedWilaya ? `${calculatedFee.toLocaleString()} DA` : "Choisir wilaya")}
+                      {loadingFee ? (locale === 'ar' ? 'جاري الحساب...' : 'Calcul...') : (selectedWilaya ? `${calculatedFee.toLocaleString()} ${t("common.da")}` : (locale === 'ar' ? 'اختر الولاية' : 'Choisir wilaya'))}
                     </span>
                   </div>
                 </div>
@@ -502,12 +499,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   disabled={isSubmitting || !selectedVariant}
                   style={{ 
                     width: "100%", padding: "16px", background: "var(--accent)", color: "#000", border: "none", 
-                    borderRadius: "0", fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "16px", 
+                    borderRadius: "0", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontWeight: 700, fontSize: "16px", 
                     letterSpacing: "0.06em", cursor: isSubmitting || !selectedVariant ? "not-allowed" : "pointer", 
                     marginTop: "8px", transition: "all 0.2s ease",
                     opacity: isSubmitting || !selectedVariant ? 0.7 : 1
                   }}>
-                  {isSubmitting ? "TRAITEMENT..." : (selectedVariant ? "ACHAT DIRECT" : "VARIANTE REQUISE")}
+                  {isSubmitting ? (locale === 'ar' ? 'جاري المعالجة...' : 'TRAITEMENT...') : (selectedVariant ? (locale === 'ar' ? 'تأكيد الطلب' : 'ACHAT DIRECT') : (locale === 'ar' ? 'اختر النوع' : 'VARIANTE REQUISE'))}
                 </button>
               </form>
             )}
@@ -515,7 +512,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           
           {/* Livraison & Infos */}
           <div>
-            <h2 style={{ fontFamily: "var(--font-condensed)", fontSize: "24px", fontWeight: 700, letterSpacing: "0.04em", marginBottom: "24px", color: "#fff" }}>LIVRAISON & INFOS</h2>
+            <h2 style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "24px", fontWeight: 700, letterSpacing: "0.04em", marginBottom: "24px", color: "#fff" }}>{locale === 'ar' ? 'التوصيل ومعلومات' : 'LIVRAISON & INFOS'}</h2>
             
             <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
               <div>
@@ -558,10 +555,10 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         {/* Related products */}
         {related.length > 0 && (
           <div>
-            <div style={{ borderTop: "1px solid var(--border)", paddingTop: "60px", marginBottom: "32px" }}>
-              <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>VOUS AIMEREZ AUSSI</p>
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: "60px", marginBottom: "32px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+              <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>{locale === 'ar' ? 'قد يعجبك أيضاً' : 'VOUS AIMEREZ AUSSI'}</p>
               <h2 className="section-heading" style={{ fontSize: "32px" }}>
-                {product.category?.name.toLowerCase().includes("pack") ? "DÉCOUVREZ D'AUTRES PACKS" : "PRODUITS SIMILAIRES"}
+                {product.category?.name.toLowerCase().includes("pack") ? (locale === 'ar' ? 'اكتشف حزم أخرى' : 'DÉCOUVREZ D\'AUTRES PACKS') : t("common.relatedProducts")}
               </h2>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "16px" }}>

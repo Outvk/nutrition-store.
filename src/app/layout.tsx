@@ -3,6 +3,14 @@ import { Poppins, Bebas_Neue, DM_Sans } from "next/font/google";
 import "./globals.css";
 import "@/lib/env";
 
+import { LanguageProvider } from "@/i18n/LanguageContext";
+import { Cairo } from "next/font/google";
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: "--font-cairo",
+});
+
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -28,9 +36,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${poppins.variable} ${bebas.variable} ${dmSans.variable}`}>
-      <body suppressHydrationWarning className={poppins.className}>
-        {children}
+    <html lang="fr" className={`${poppins.variable} ${bebas.variable} ${dmSans.variable} ${cairo.variable}`}>
+      <body suppressHydrationWarning className={`${poppins.className}`}>
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

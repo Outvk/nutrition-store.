@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.font-arabic {
+  font-family: var(--font-cairo), sans-serif !important;
+}
+
 :root {
   --bg-primary: #0a0a0a;
   --bg-secondary: #111111;
@@ -765,3 +769,35 @@ body {
   scrollbar-width: none;
 }
 
+/* ─── RTL Layout Protection ────────────────────────────────────────────── */
+/* When Arabic is active (html[dir=rtl]), lock structural layout elements   */
+/* to LTR so flex/grid reordering does not break the carefully-built UI.   */
+
+html[dir="rtl"] nav,
+html[dir="rtl"] .ticker-wrap,
+html[dir="rtl"] .ticker-inner,
+html[dir="rtl"] .promo-bar,
+html[dir="rtl"] .promo-wrap,
+html[dir="rtl"] .promo-inner,
+html[dir="rtl"] .hero-section,
+html[dir="rtl"] .hero-content,
+html[dir="rtl"] .hero-slide-arrows,
+html[dir="rtl"] .hero-dots,
+html[dir="rtl"] .brands-grid,
+html[dir="rtl"] .goals-grid,
+html[dir="rtl"] .local-goals-grid,
+html[dir="rtl"] .flash-big-card,
+html[dir="rtl"] .flash-big-card-inner,
+html[dir="rtl"] .flash-image-wrap,
+html[dir="rtl"] .responsive-grid-split,
+html[dir="rtl"] .featured-visual,
+html[dir="rtl"] .featured-visual-overlay,
+html[dir="rtl"] .mobile-grid-2,
+html[dir="rtl"] .checkout-grid,
+html[dir="rtl"] .checkout-summary-sticky,
+html[dir="rtl"] .product-gallery-flex,
+html[dir="rtl"] .product-thumbnails-list,
+html[dir="rtl"] .mobile-grid-1,
+html[dir="rtl"] .brands-grid {
+  direction: ltr;
+}

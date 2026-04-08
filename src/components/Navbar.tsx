@@ -6,6 +6,8 @@ import { ShoppingCart, Menu, X, Search, Zap } from "lucide-react";
 import { getCart } from "@/lib/cart";
 import { STORE_CONFIG } from "@/lib/config";
 import { Category, Brand, Product } from "@/types";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { Globe } from "lucide-react";
 
 interface PackProduct extends Product {
   nav_image?: string;
@@ -13,6 +15,7 @@ interface PackProduct extends Product {
 }
 
 export default function Navbar() {
+  const { locale, setLocale, t, dir } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<"categories" | "marques">("categories");
@@ -186,14 +189,14 @@ export default function Navbar() {
         <div className="ticker-inner" style={{ gap: "80px" }}>
           {[...Array(6)].map((_, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: "48px", paddingRight: "48px" }}>
-              <span style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "12px", letterSpacing: "0.08em", color: "#000" }}>
-                🚚 LIVRAISON PARTOUT EN ALGÉRIE
+              <span className={locale === 'ar' ? 'font-arabic' : ''} style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "12px", letterSpacing: "0.08em", color: "#000" }}>
+                {locale === 'ar' ? '🚚 توصيل إلى جميع الولايات' : '🚚 LIVRAISON PARTOUT EN ALGÉRIE'}
               </span>
-              <span style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "12px", letterSpacing: "0.08em", color: "#000" }}>
-                💳 PAIEMENT À LA LIVRAISON
+              <span className={locale === 'ar' ? 'font-arabic' : ''} style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "12px", letterSpacing: "0.08em", color: "#000" }}>
+                {locale === 'ar' ? '💳 الدفع عند الاستلام' : '💳 PAIEMENT À LA LIVRAISON'}
               </span>
-              <span style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "12px", letterSpacing: "0.08em", color: "#000" }}>
-                ⚡ PRODUITS 100% AUTHENTIQUES
+              <span className={locale === 'ar' ? 'font-arabic' : ''} style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: "12px", letterSpacing: "0.08em", color: "#000" }}>
+                {locale === 'ar' ? '⚡ منتجات أصلية 100%' : '⚡ PRODUITS 100% AUTHENTIQUES'}
               </span>
             </div>
           ))}
@@ -295,17 +298,17 @@ export default function Navbar() {
               {/* Desktop nav links */}
               <div style={{ display: "flex", alignItems: "center", gap: "32px" }} className="hidden md:flex">
                 {[
-                  { label: "PRODUITS", href: "/products" },
-                  { label: "MARQUES", href: "/marques" },
-                  { label: "PACKS", href: "/packs" },
-                  { label: "SOLDES", href: "/products?sale=true" },
+                  { label: "products", href: "/products" },
+                  { label: "brands", href: "/marques" },
+                  { label: "packs", href: "/packs" },
+                  { label: "sale", href: "/products?sale=true" },
                 ].map((item) => (
                   <Link key={item.label} href={item.href} 
                     onMouseEnter={() => setHovered(item.label)}
                     style={{
-                      fontFamily: "var(--font-alt)",
-                      fontWeight: 600,
-                      fontSize: "13px",
+                      fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)',
+                      fontWeight: 700,
+                      fontSize: locale === 'ar' ? "14px" : "13px",
                       letterSpacing: "0.05em",
                       color: hovered === item.label ? "var(--accent)" : "var(--text-secondary)",
                       textDecoration: "none",
@@ -317,7 +320,7 @@ export default function Navbar() {
                       marginBottom: "-1px"
                     }}
                   >
-                    {item.label}
+                    {t(`nav.${item.label}`)}
                   </Link>
                 ))}
               </div>
@@ -331,6 +334,27 @@ export default function Navbar() {
                   onMouseLeave={e => (e.currentTarget.style.color = "var(--text-secondary)")}
                 >
                   <Search size={20} />
+                </button>
+
+                {/* Language Toggler */}
+                <button 
+                  onClick={() => setLocale(locale === 'fr' ? 'ar' : 'fr')}
+                  style={{ 
+                    background: "rgba(255,255,255,0.05)", 
+                    border: "1px solid var(--border)", 
+                    borderRadius: "4px",
+                    color: "var(--accent)", 
+                    fontSize: "11px", 
+                    fontWeight: 700, 
+                    padding: "4px 8px", 
+                    cursor: "pointer",
+                    fontFamily: locale === 'ar' ? 'var(--font-poppins)' : 'var(--font-cairo)',
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "var(--accent)"; e.currentTarget.style.color = "#000"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "var(--accent)"; }}
+                >
+                  {locale === 'fr' ? 'AR' : 'FR'}
                 </button>
 
 
@@ -377,7 +401,7 @@ export default function Navbar() {
           background: "rgba(10,10,10,0.4)"
         }}>
           <div className="hide-scrollbar" style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", maxHeight: "80vh", overflowY: "auto" }}>
-            {hovered === "PRODUITS" && (
+            {hovered === "products" && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "20px" }}>
                 {categories.map(cat => (
                   <Link key={cat.id} href={`/products?category=${cat.id}`} onClick={() => setHovered(null)}
@@ -398,7 +422,7 @@ export default function Navbar() {
               </div>
             )}
 
-            {hovered === "MARQUES" && (
+            {hovered === "brands" && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "20px" }}>
                 {brands.map(brand => (
                   <Link key={brand.id} href={`/marques#brand-${brand.id}`} onClick={() => setHovered(null)}
@@ -419,7 +443,7 @@ export default function Navbar() {
               </div>
             )}
 
-            {hovered === "SOLDES" && (
+            {hovered === "sale" && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "20px" }}>
                 {saleProducts.map(p => (
                   <Link key={p.id} href={`/products/${p.id}`} onClick={() => setHovered(null)}
@@ -452,7 +476,7 @@ export default function Navbar() {
               </div>
             )}
 
-            {hovered === "PACKS" && (
+            {hovered === "packs" && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
                 {packProducts.map(p => (
                   <Link key={p.id} href={`/products/${p.id}`} onClick={() => setHovered(null)}
@@ -507,13 +531,13 @@ export default function Navbar() {
               <div style={{ display: "flex", borderBottom: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
                  <button 
                    onClick={() => setMobileTab("categories")}
-                   style={{ flex: 1, padding: "16px 0", background: "none", border: "none", borderBottom: mobileTab === "categories" ? "2px solid var(--accent)" : "2px solid transparent", color: mobileTab === "categories" ? "#fff" : "var(--text-secondary)", fontFamily: "var(--font-alt)", fontSize: "14px", letterSpacing: "0.05em", fontWeight: 400, cursor: "pointer", transition: "all 0.2s" }}>
-                   CATÉGORIES
+                   style={{ flex: 1, padding: "16px 0", background: "none", border: "none", borderBottom: mobileTab === "categories" ? "2px solid var(--accent)" : "2px solid transparent", color: mobileTab === "categories" ? "#fff" : "var(--text-secondary)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontSize: "14px", letterSpacing: "0.05em", fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>
+                   {t("nav.categories")}
                  </button>
                  <button 
                    onClick={() => setMobileTab("marques")}
-                   style={{ flex: 1, padding: "16px 0", background: "none", border: "none", borderBottom: mobileTab === "marques" ? "2px solid var(--accent)" : "2px solid transparent", color: mobileTab === "marques" ? "#fff" : "var(--text-secondary)", fontFamily: "var(--font-alt)", fontSize: "14px", letterSpacing: "0.05em", fontWeight: 400, cursor: "pointer", transition: "all 0.2s" }}>
-                   MARQUES
+                   style={{ flex: 1, padding: "16px 0", background: "none", border: "none", borderBottom: mobileTab === "marques" ? "2px solid var(--accent)" : "2px solid transparent", color: mobileTab === "marques" ? "#fff" : "var(--text-secondary)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontSize: "14px", letterSpacing: "0.05em", fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>
+                   {t("nav.brands_label")}
                  </button>
               </div>
 
@@ -522,7 +546,7 @@ export default function Navbar() {
                 {mobileTab === "categories" ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     {categories.length === 0 ? (
-                      <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>Chargement...</p>
+                      <p style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("common.loading")}</p>
                     ) : categories.map((cat) => (
                       <Link key={cat.id} href={`/products?category=${cat.id}`} onClick={() => setMenuOpen(false)} 
                         style={{
@@ -545,7 +569,7 @@ export default function Navbar() {
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     {brands.length === 0 ? (
-                      <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>Chargement...</p>
+                      <p style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("common.loading")}</p>
                     ) : brands.map((brand) => (
                       <Link key={brand.id} href={`/marques#brand-${brand.id}`} onClick={() => setMenuOpen(false)} 
                         style={{
@@ -582,10 +606,11 @@ export default function Navbar() {
 
         {mounted && isMobile && (
           <div style={{ display: "flex", justifyContent: "space-around", gap: "8px", borderTop: "1px solid var(--border)", background: "var(--bg-secondary)", padding: "10px 12px" }}>
-            <Link href="/products" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "11px", color: "var(--text-primary)" }}>PRODUITS</Link>
-            <Link href="/marques" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "11px", color: "var(--text-primary)" }}>MARQUES</Link>
-            <Link href="/packs" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "11px", color: "var(--text-primary)" }}>PACKS</Link>
-            <Link href="/products?sale=true" style={{ textDecoration: "none", fontFamily: "var(--font-alt)", fontWeight: 400, fontSize: "11px", color: "var(--text-primary)" }}>SOLDES</Link>
+            <Link href="/products" style={{ textDecoration: "none", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontWeight: 700, fontSize: "11px", color: "var(--text-primary)" }}>{t("nav.products")}</Link>
+            <Link href="/marques" style={{ textDecoration: "none", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontWeight: 700, fontSize: "11px", color: "var(--text-primary)" }}>{t("nav.brands")}</Link>
+            <Link href="/packs" style={{ textDecoration: "none", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontWeight: 700, fontSize: "11px", color: "var(--text-primary)" }}>{t("nav.packs")}</Link>
+            <Link href="/products?sale=true" style={{ textDecoration: "none", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontWeight: 700, fontSize: "11px", color: "var(--text-primary)" }}>{t("nav.sale")}</Link>
+            <button onClick={() => setLocale(locale === 'fr' ? 'ar' : 'fr')} style={{ background: "none", border: "1px solid var(--accent)", color: "var(--accent)", fontSize: "10px", fontWeight: 800, padding: "2px 6px", cursor: "pointer", fontFamily: locale === 'ar' ? 'var(--font-condensed)' : 'var(--font-cairo)' }}>{locale === 'fr' ? 'AR' : 'FR'}</button>
           </div>
         )}
 
@@ -665,9 +690,9 @@ export default function Navbar() {
               {!isMobile && (
                 <div style={{ marginBottom: "40px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "20px" }}>
-                    <h4 style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, margin: 0 }}>RECHERCHES RÉCENTES</h4>
+                    <h4 style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, margin: 0 }}>{t("search.recent")}</h4>
                     {recentSearches.length > 0 && (
-                      <button onClick={clearRecentSearches} style={{ background: "none", border: "none", fontSize: "10px", color: "#ff6262ff", cursor: "pointer", fontWeight: 600 }}>EFFACER</button>
+                      <button onClick={clearRecentSearches} style={{ background: "none", border: "none", fontSize: "10px", color: "#ff6262ff", cursor: "pointer", fontWeight: 600 }}>{t("search.clear")}</button>
                     )}
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
@@ -701,7 +726,7 @@ export default function Navbar() {
 
               {!isMobile && (
                 <div>
-                  <h4 style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, marginBottom: "20px" }}>CATÉGORIES</h4>
+                  <h4 style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, marginBottom: "20px" }}>{t("nav.categories")}</h4>
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {categories.map(cat => (
                       <button 
@@ -735,10 +760,10 @@ export default function Navbar() {
               minHeight: isMobile ? "calc(100vh - 200px)" : "auto"
             }}>
               {isSearching ? (
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}><p>Chargement...</p></div>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}><p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("common.loading")}</p></div>
               ) : searchQuery.length > 0 ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "20px" : "32px" }}>
-                  <p style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", color: "#999", fontWeight: 800, letterSpacing: "0.1em" }}>RÉSULTATS POUR "{searchQuery.toUpperCase()}"</p>
+                  <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "11px", color: "#999", fontWeight: 800, letterSpacing: "0.1em" }}>{locale === 'ar' ? `نتائج ل "${searchQuery.toUpperCase()}"` : `RÉSULTATS POUR "${searchQuery.toUpperCase()}"`}</p>
                   
                   {searchResults.length > 0 ? (
                     <div style={{ 
@@ -765,13 +790,13 @@ export default function Navbar() {
                     </div>
                   ) : (
                     <div style={{ padding: "60px 20px", textAlign: "center", border: "1px dashed #eee", background: "#fafafa" }}>
-                      <p style={{ fontFamily: "var(--font-condensed)", color: "#999", fontSize: "14px" }}>AUCUN PRODUIT TROUVÉ POUR VOTRE RECHERCHE</p>
+                      <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', color: "#999", fontSize: "14px" }}>{t("search.noResults")}</p>
                     </div>
                   )}
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                  <p style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", color: "#999", marginBottom: "24px", fontWeight: 800 }}>PRODUITS POPULAIRES</p>
+                  <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "11px", color: "#999", marginBottom: "24px", fontWeight: 800 }}>{t("search.popular")}</p>
                   <div style={{ 
                     display: "grid", 
                     gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", 

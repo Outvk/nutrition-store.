@@ -6,6 +6,7 @@ import { Zap, Plus, Minus } from "lucide-react";
 import { Product } from "@/types";
 import { addToCart } from "@/lib/cart";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Props {
   product: Product;
@@ -19,6 +20,7 @@ export default function ProductCard({ product, isLight = false, isList = false }
   const [isAdding, setIsAdding] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
+  const { t, locale } = useLanguage();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -107,14 +109,15 @@ export default function ProductCard({ product, isLight = false, isList = false }
                 style={{ 
                   position: "absolute", 
                   top: "12px", 
-                  left: "12px", 
+                  left: locale === 'ar' ? 'auto' : '12px',
+                  right: locale === 'ar' ? '12px' : 'auto',
                   borderRadius: "0", 
                   background: "var(--red)",
                   color: "#fff",
                   padding: "4px 8px",
                   fontSize: "10px",
                   fontWeight: 800,
-                  fontFamily: "var(--font-condensed)",
+                  fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)',
                   zIndex: 2
                 }}
               >
@@ -149,7 +152,7 @@ export default function ProductCard({ product, isLight = false, isList = false }
                     border: "none", 
                     cursor: "pointer", 
                     fontSize: isMobile ? "9px" : "11px",
-                    fontFamily: "var(--font-condensed)",
+                    fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)',
                     fontWeight: 900,
                     letterSpacing: isMobile ? "0.02em" : "0.1em",
                     textTransform: "uppercase",
@@ -161,7 +164,7 @@ export default function ProductCard({ product, isLight = false, isList = false }
                     boxShadow: "0 10px 20px rgba(0,0,0,0.4)"
                   }}
                 >
-                  <Zap size={14} fill="#000" /> COMMANDER DIRECT
+                  <Zap size={14} fill="#000" /> {locale === 'ar' ? 'طلب مباشر' : 'COMMANDER DIRECT'}
                 </button>
               </div>
             </div>
@@ -175,14 +178,15 @@ export default function ProductCard({ product, isLight = false, isList = false }
             flex: 1, 
             gap: isList ? "8px" : "10px", 
             position: "relative",
-            justifyContent: isList ? "center" : "flex-start"
+            justifyContent: isList ? "center" : "flex-start",
+            textAlign: locale === 'ar' ? 'right' : 'left'
           }}>
             <h3 style={{ 
               fontSize: "13px", 
               fontWeight: 700, 
               color: isLight ? "#111" : "var(--text-primary)", 
               lineHeight: 1.3, 
-              fontFamily: "var(--font-display)",
+              fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-display)',
               letterSpacing: "0.02em",
               textTransform: "uppercase",
               display: "-webkit-box",
@@ -194,11 +198,11 @@ export default function ProductCard({ product, isLight = false, isList = false }
               {product.name}
             </h3>
 
-            <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "10px", justifyContent: locale === 'ar' ? 'flex-end' : 'flex-start', direction: 'ltr' }}>
               {product.sale_price ? (
                 <>
                   <span style={{ fontFamily: "var(--font-condensed)", fontSize: "16px", fontWeight: 700, color: isLight ? "#000" : "var(--accent)" }}>
-                    {product.sale_price.toLocaleString()} DA
+                    {product.sale_price.toLocaleString()} {t("common.da")}
                   </span>
                   <span style={{ fontSize: "12px", color: isLight ? "#999" : "var(--text-muted)", textDecoration: "line-through" }}>
                     {product.price.toLocaleString()}
@@ -206,13 +210,13 @@ export default function ProductCard({ product, isLight = false, isList = false }
                 </>
               ) : (
                 <span style={{ fontFamily: "var(--font-condensed)", fontSize: "16px", fontWeight: 700, color: isLight ? "#111" : "var(--text-primary)" }}>
-                  {product.price.toLocaleString()} DA
+                  {product.price.toLocaleString()} {t("common.da")}
                 </span>
               )}
             </div>
 
             {/* 3. Rating */}
-            <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "2px", justifyContent: locale === 'ar' ? 'flex-end' : 'flex-start' }}>
               {[1, 2, 3, 4, 5].map(star => (
                 <svg key={star} width="10" height="10" viewBox="0 0 24 24" fill={star <= 4 ? (isLight ? "#000" : "var(--accent)") : (isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)")}>
                   <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -260,7 +264,7 @@ export default function ProductCard({ product, isLight = false, isList = false }
                 border: "none", 
                 cursor: isAdding ? "default" : "pointer", 
                 fontSize: "10px",
-                fontFamily: "var(--font-condensed)",
+                fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)',
                 fontWeight: 800,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -272,7 +276,7 @@ export default function ProductCard({ product, isLight = false, isList = false }
               onMouseEnter={e => { if (!isAdding) e.currentTarget.style.background = "#eeeeee"; }}
               onMouseLeave={e => { if (!isAdding) e.currentTarget.style.background = "#ffffff"; }}
             >
-              {isAdding ? "AJOUTÉ !" : "AJOUTER AU PANIER"}
+              {isAdding ? (locale === 'ar' ? 'تمت الإضافة !' : 'AJOUTÉ !') : t("common.addToCart")}
             </button>
           </div>
         </div>
