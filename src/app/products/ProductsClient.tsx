@@ -42,6 +42,12 @@ export default function ProductsClient({ initialProducts, total, brands, categor
 
   const [openSection, setOpenSection] = useState<string | null>("category");
 
+  const resetFilters = () => {
+    setPopularOnly(false);
+    setSortBy("default");
+    router.push('/products');
+  };
+
   let filtered = [...initialProducts];
   if (popularOnly) {
     // Note: 'is_popular' may not match typed schema, if not remove or mock here
@@ -204,7 +210,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
 
       <div style={{ maxWidth: "100%", margin: "0 auto", padding: "60px 40px 60px 12px" }}>
         
-        <div className="product-layout-grid" style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: "40px", alignItems: "start" }}>
+        <div className="product-layout-grid" style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "40px", alignItems: "start" }}>
           
           {/* Sidebar */}
           <aside className="mobile-hide" style={{ 
@@ -223,7 +229,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
               alignItems: "center",
               borderTop: "1px solid var(--border)",
               borderBottom: "1px solid var(--border)",
-              padding: "16px 20px 16px 12px", // tight left padding
+              padding: "16px 20px 16px 15px", // refined left padding
               marginBottom: "32px",
               marginRight: "-1px"
             }}>
@@ -235,7 +241,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
                 color: "#fff",
                 margin: 0
               }}>FILTRES</h2>
-              <button onClick={() => { setSelectedBrand(null); setSelectedCategory(null); setOnSaleOnly(false); setPopularOnly(false); setSortBy("default"); }}
+              <button onClick={resetFilters}
                 style={{ 
                   background: "rgba(255,255,255,0.03)", 
                   border: "1px solid var(--border)", 
@@ -254,7 +260,7 @@ export default function ProductsClient({ initialProducts, total, brands, categor
               </button>
             </div>
             
-            <div style={{ paddingRight: "40px" }}>
+            <div style={{ paddingLeft: "8px", paddingRight: "40px" }}>
               <FilterPanel />
             </div>
           </aside>
@@ -338,7 +344,10 @@ export default function ProductsClient({ initialProducts, total, brands, categor
             borderRight: "1px solid var(--border)", boxShadow: "20px 0 40px rgba(0,0,0,0.7)" 
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
-               <h2 style={{ fontFamily: "var(--font-condensed)", fontSize: "24px", fontWeight: 800 }}>FILTRES</h2>
+               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                 <h2 style={{ fontFamily: "var(--font-condensed)", fontSize: "24px", fontWeight: 800 }}>FILTRES</h2>
+                 <button onClick={resetFilters} style={{ background: "none", border: "1px solid var(--accent)", color: "var(--accent)", fontSize: "10px", padding: "4px 8px", cursor: "pointer"}}>RÉINITIALISER</button>
+               </div>
                <button onClick={() => setFiltersOpen(false)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}><X size={32} /></button>
             </div>
             <FilterPanel />

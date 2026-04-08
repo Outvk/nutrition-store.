@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ShoppingBag, TrendingUp, Package, AlertTriangle, Clock, CheckCircle, Truck, XCircle, RotateCw } from "lucide-react";
-import { Order } from "@/types";
+import { Order, DashboardStats, LowStockItem } from "@/types";
 import Link from "next/link";
 import { resetRevenue } from "./actions";
 import { useRouter } from "next/navigation";
@@ -31,10 +31,10 @@ function useCountUp(target: number, duration = 1500, trigger = 0) {
 }
 
 interface DashboardClientProps {
-  stats: any;
+  stats: DashboardStats | null;
   allOrders: Order[];
   recentOrders: Order[];
-  lowStock: any[];
+  lowStock: LowStockItem[];
   activeProductsCount: number;
   revenueResetAt?: string | null;
 }
@@ -52,8 +52,8 @@ export default function DashboardClient({ stats, allOrders, recentOrders, lowSto
   const totalRevenue = Number(stats?.total_revenue || 0);
   const totalOrders = Number(stats?.total_orders || 0);
   const pendingCount = Number(stats?.pending_count || 0);
-  const outOfStockArr = lowStock.filter((v: any) => v.stock === 0);
-  const lowStockArr = lowStock.filter((v: any) => v.stock > 0);
+  const outOfStockArr = lowStock.filter((v: LowStockItem) => v.stock === 0);
+  const lowStockArr = lowStock.filter((v: LowStockItem) => v.stock > 0);
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
@@ -420,13 +420,13 @@ export default function DashboardClient({ stats, allOrders, recentOrders, lowSto
               </div>
               <div style={{ padding: "12px" }}>
                 {outOfStockArr.slice(0, 3).map(v => (
-                  <div key={v.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", borderRadius: "0px", marginBottom: "4px", background: "rgba(239,68,68,0.06)" }}>
+                  <div key={v.variant_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", borderRadius: "0px", marginBottom: "4px", background: "rgba(239,68,68,0.06)" }}>
                     <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{v.flavor} / {v.size}</span>
                     <span style={{ fontSize: "11px", fontFamily: "var(--font-condensed)", fontWeight: 700, color: "#ef4444" }}>ÉPUISÉ</span>
                   </div>
                 ))}
                 {lowStockArr.slice(0, 3).map(v => (
-                  <div key={v.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", borderRadius: "0px", marginBottom: "4px", background: "rgba(245,158,11,0.06)" }}>
+                  <div key={v.variant_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", borderRadius: "0px", marginBottom: "4px", background: "rgba(245,158,11,0.06)" }}>
                     <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{v.flavor} / {v.size}</span>
                     <span style={{ fontSize: "11px", fontFamily: "var(--font-condensed)", fontWeight: 700, color: "#f59e0b" }}>{v.stock} restants</span>
                   </div>

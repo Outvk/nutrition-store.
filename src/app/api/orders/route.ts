@@ -3,6 +3,8 @@ import { ratelimit } from '@/lib/ratelimit';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { insertOrder } from '@/lib/supabase/queries';
+import { createClient } from '@/lib/supabase/server';
+import { AppError } from '@/lib/errors';
 
 // Validation Schema
 const orderSchema = z.object({
@@ -82,12 +84,52 @@ export async function POST(req: Request) {
       }
     }
 
-    // 5. Insert order + order_items
-    const { orderId } = await insertOrder(orderData, items);
+    // 1.5. SERVER-SIDE PRICE VALIDATION (TASK 3)
+    const supabase = await createClient();
+    const productIds = Array.from(new Set(items.map(i => i.product_id)));
+    const { data: dbProducts, error: dbError } = await supabase
+      .from('products')
+      .select('id, price, sale_price, is_active')
+      .in('id', productIds);
+
+    if (dbError || !dbProducts || dbProducts.length !== productIds.length) {
+      return NextResponse.json({ error: 'Certains produits ne sont plus disponibles.' }, { status: 400 });
+    }
+
+    const priceMap = new Map(dbProducts.map(p => [p.id, p]));
+    let serverTotal = 0;
+    
+    // Check for inactive products and verify existence
+    for (const item of items) {
+      const dbProd = priceMap.get(item.product_id);
+      if (!dbProd || !dbProd.is_active) {
+        return NextResponse.json({ error: `Le produit ${item.product_id} est inactif ou indisponible.` }, { status: 400 });
+      }
+    }
+
+    const validatedItems = items.map(item => {
+      const dbProd = priceMap.get(item.product_id)!;
+      const actualPrice = dbProd.sale_price ?? dbProd.price;
+      serverTotal += actualPrice * item.quantity;
+      return {
+        ...item,
+        unit_price: actualPrice
+      };
+    });
+
+    const finalTotal = serverTotal + orderData.delivery_fee;
+    const finalOrderData = { ...orderData, total: finalTotal };
+
+    // 5. Insert order + order_items using validated data
+    const { orderId } = await insertOrder(finalOrderData, validatedItems);
     
     return NextResponse.json({ orderId });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Order API Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    if (error instanceof AppError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

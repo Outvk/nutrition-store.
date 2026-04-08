@@ -1,10 +1,16 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart, Menu, X, Search, Zap } from "lucide-react";
 import { getCart } from "@/lib/cart";
 import { STORE_CONFIG } from "@/lib/config";
+import { Category, Brand, Product } from "@/types";
+
+interface PackProduct extends Product {
+  nav_image?: string;
+  nav_label?: string;
+}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -12,26 +18,32 @@ export default function Navbar() {
   const [mobileTab, setMobileTab] = useState<"categories" | "marques">("categories");
   const [isMobile, setIsMobile] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [brands, setBrands] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [mounted, setMounted] = useState(false);
   
   // Search state
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const [hovered, setHovered] = useState<string | null>(null);
-  const [saleProducts, setSaleProducts] = useState<any[]>([]);
-  const [popularProducts, setPopularProducts] = useState<any[]>([]);
-  const [packProducts, setPackProducts] = useState<any[]>([]);
+  const [saleProducts, setSaleProducts] = useState<Product[]>([]);
+  const [popularProducts, setPopularProducts] = useState<Product[]>([]);
+  const [packProducts, setPackProducts] = useState<PackProduct[]>([]);
+
+  const isManualRef = useRef(false);
 
   useEffect(() => {
     const performSearch = async () => {
+      if (isManualRef.current) {
+        isManualRef.current = false;
+        return;
+      }
       if (searchQuery.trim().length < 2) {
         setSearchResults([]);
         return;
@@ -50,6 +62,20 @@ export default function Navbar() {
     const timer = setTimeout(performSearch, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  const handleCategorySearch = async (cat: Category) => {
+    isManualRef.current = true;
+    setSearchQuery(cat.name.toUpperCase());
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/search?category_id=${cat.id}`);
+      if (res.ok) setSearchResults(await res.json());
+    } catch (e) {
+      console.error("Category search failed", e);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   useEffect(() => {
     const loadTaxonomy = async () => {
@@ -560,14 +586,16 @@ export default function Navbar() {
           animation: "fadeIn 0.2s ease",
           color: "#000"
         }}>
-          {!isMobile && <SearchInput isMobile={isMobile} searchQuery={searchQuery} setSearchQuery={setSearchQuery} setSearchOpen={setSearchOpen} />}
+          <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0" }}>
+            <SearchInput isMobile={isMobile} searchQuery={searchQuery} setSearchQuery={setSearchQuery} setSearchOpen={setSearchOpen} />
+          </div>
 
           <div style={{ 
             display: "grid", 
             gridTemplateColumns: isMobile ? "1fr" : "260px 1fr", 
             flex: 1, 
-            overflow: "hidden" 
-          }}>
+            overflow: isMobile ? "auto" : "hidden" 
+          }} className="hide-scrollbar">
             {/* Sidebar */}
             <div style={{ 
               padding: isMobile ? "12px 0px" : "40px 40px", 
@@ -587,31 +615,30 @@ export default function Navbar() {
                     scrollbarWidth: "none"
                   }} className="mobile-hide-scrollbar">
                     {categories.map(cat => (
-                      <Link 
+                      <button 
                         key={cat.id} 
-                        href={`/products?category=${cat.id}`} 
-                        onClick={() => setSearchOpen(false)} 
+                        onClick={() => handleCategorySearch(cat)} 
                         style={{ 
                           color: "#333", 
-                          textDecoration: "none", 
+                          background: "#fff",
+                          border: "1px solid #ddd",
+                          borderRadius: "4px",
                           fontSize: "12px", 
                           fontFamily: "var(--font-condensed)", 
                           whiteSpace: "nowrap",
                           padding: "8px 16px",
-                          border: "1px solid #ddd",
-                          background: "#fff",
-                          borderRadius: "4px",
-                          fontWeight: 700
+                          fontWeight: 700,
+                          cursor: "pointer"
                         }} 
                       >
                         {cat.name.toUpperCase()}
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {isMobile && <SearchInput isMobile={isMobile} searchQuery={searchQuery} setSearchQuery={setSearchQuery} setSearchOpen={setSearchOpen} />}
+
 
               {!isMobile && (
                 <div style={{ marginBottom: "40px" }}>
@@ -645,14 +672,23 @@ export default function Navbar() {
                   <h4 style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, marginBottom: "20px" }}>CATÉGORIES</h4>
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                     {categories.map(cat => (
-                      <Link 
+                      <button 
                         key={cat.id} 
-                        href={`/products?category=${cat.id}`} 
-                        onClick={() => setSearchOpen(false)} 
-                        style={{ color: "#333", textDecoration: "none", fontSize: "14px", fontFamily: "var(--font-condensed)", fontWeight: 600 }}
+                        onClick={() => handleCategorySearch(cat)} 
+                        style={{ 
+                          color: "#333", 
+                          background: "none",
+                          border: "none",
+                          textAlign: "left",
+                          fontSize: "14px", 
+                          fontFamily: "var(--font-condensed)", 
+                          fontWeight: 600,
+                          padding: 0,
+                          cursor: "pointer"
+                        }}
                       >
                         {cat.name.toUpperCase()}
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -663,25 +699,36 @@ export default function Navbar() {
             <div style={{ 
               padding: isMobile ? "20px" : "40px 60px", 
               overflowY: "auto",
-              background: "#fff"
+              background: "#fff",
+              minHeight: isMobile ? "calc(100vh - 200px)" : "auto"
             }}>
               {isSearching ? (
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}><p>Chargement...</p></div>
               ) : searchQuery.length > 0 ? (
-                <div style={{ 
-                  display: "grid", 
-                  gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", 
-                  gap: isMobile ? "16px" : "32px" 
-                }}>
-                  {searchResults.map(p => (
-                    <Link key={p.id} href={`/products/${p.id}`} onClick={() => setSearchOpen(false)} style={{ textDecoration: "none", display: "flex", flexDirection: "column" }}>
-                      <div style={{ width: "100%", aspectRatio: "1/1", border: "1px solid #eee", borderBottom: "2px solid #000", position: "relative", marginBottom: "12px" }}>
-                        {p.images?.[0] && <Image src={p.images[0]} alt={p.name} fill style={{ objectFit: "contain", padding: isMobile ? "12px" : "24px" }} />}
-                      </div>
-                      <p style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: isMobile ? "13px" : "15px", color: "#000", height: isMobile ? "32px" : "40px", overflow: "hidden" }}>{p.name.toUpperCase()}</p>
-                      <p style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? "16px" : "20px", color: "#000" }}>{p.price.toLocaleString()} DA</p>
-                    </Link>
-                  ))}
+                <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "20px" : "32px" }}>
+                  <p style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", color: "#999", fontWeight: 800, letterSpacing: "0.1em" }}>RÉSULTATS POUR "{searchQuery.toUpperCase()}"</p>
+                  
+                  {searchResults.length > 0 ? (
+                    <div style={{ 
+                      display: "grid", 
+                      gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", 
+                      gap: isMobile ? "16px" : "32px" 
+                    }}>
+                      {searchResults.map(p => (
+                        <Link key={p.id} href={`/products/${p.id}`} onClick={() => setSearchOpen(false)} style={{ textDecoration: "none", display: "flex", flexDirection: "column" }}>
+                          <div style={{ width: "100%", aspectRatio: "1/1", border: "1px solid #eee", borderBottom: "2px solid #000", position: "relative", marginBottom: "12px" }}>
+                            {p.images?.[0] && <Image src={p.images[0]} alt={p.name} fill style={{ objectFit: "contain", padding: isMobile ? "12px" : "24px" }} />}
+                          </div>
+                          <p style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: isMobile ? "13px" : "15px", color: "#000", height: isMobile ? "32px" : "40px", overflow: "hidden" }}>{p.name.toUpperCase()}</p>
+                          <p style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? "16px" : "20px", color: "#000" }}>{p.price.toLocaleString()} DA</p>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ padding: "60px 20px", textAlign: "center", border: "1px dashed #eee", background: "#fafafa" }}>
+                      <p style={{ fontFamily: "var(--font-condensed)", color: "#999", fontSize: "14px" }}>AUCUN PRODUIT TROUVÉ POUR VOTRE RECHERCHE</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column" }}>
@@ -714,7 +761,7 @@ export default function Navbar() {
   );
 }
 
-const SearchInput = ({ isMobile, searchQuery, setSearchQuery, setSearchOpen }: any) => (
+const SearchInput = ({ isMobile, searchQuery, setSearchQuery, setSearchOpen }: { isMobile: boolean, searchQuery: string, setSearchQuery: (q: string) => void, setSearchOpen: (o: boolean) => void }) => (
   <div style={{ 
     padding: isMobile ? "16px 20px" : "24px 60px", 
     borderBottom: "1px solid #eee",
@@ -729,18 +776,19 @@ const SearchInput = ({ isMobile, searchQuery, setSearchQuery, setSearchOpen }: a
       type="text" 
       value={searchQuery}
       onChange={e => setSearchQuery(e.target.value)}
-      placeholder="RECHERCHER UN PRODUIT, UNE MARQUE..." 
+      placeholder="RECHERCHER..." 
       style={{ 
         flex: 1, 
         background: "none", 
         border: "none", 
         color: "#000", 
-        fontSize: isMobile ? "18px" : "24px", 
+        fontSize: isMobile ? "16px" : "24px", 
         fontFamily: "var(--font-condensed)", 
         fontWeight: 700, 
         outline: "none",
         textTransform: "uppercase",
-        letterSpacing: "0.05em"
+        letterSpacing: "0.05em",
+        width: "100%"
       }}
     />
     <button 

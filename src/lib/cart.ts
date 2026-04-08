@@ -1,10 +1,4 @@
-import { Product } from "@/types";
-
-export interface CartItem {
-  product: Product;
-  variant: any;
-  quantity: number;
-}
+import { Product, Variant, CartItem } from "@/types";
 
 export function getCart(): CartItem[] {
   if (typeof window === "undefined") return [];
@@ -19,7 +13,7 @@ export function saveCart(cart: CartItem[]) {
   }
 }
 
-export function addToCart(product: Product, variant: any, quantity: number) {
+export function addToCart(product: Product, variant: Variant | null, quantity: number) {
   const cart = getCart();
   const existingId = cart.findIndex(i => i.product.id === product.id && (i.variant?.id === variant?.id || !variant));
   

@@ -7,15 +7,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import Countdown from "@/components/Countdown";
-import { Product, Brand, Category } from "@/types";
+import { Product, Brand, Category, SaleEvent, LandingContent } from "@/types";
 
 interface HomeClientProps {
   featuredProducts: Product[];
   saleProducts: Product[];
   brands: Brand[];
   categories: Category[];
-  activeSale: any;
-  landingContent?: any;
+  activeSale: SaleEvent | null;
+  landingContent: any; // Keep as any for now due to complexity of JSONB structure in DB but at least we have the props typed
 }
 
 
@@ -125,7 +125,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
 
         {/* Dots */}
         <div className="hero-dots" style={{ position: "absolute", bottom: "32px", left: "50%", transform: "translateX(-50%)", display: "flex", gap: "8px", zIndex: 3 }}>
-          {slides.map((_: any, i: number) => (
+          {slides.map((_: unknown, i: number) => (
             <button key={i} onClick={() => { setFade(false); setTimeout(() => { setSlide(i); setFade(true); }, 200); }}
               style={{ width: i === slide ? "40px" : "12px", height: "3px", borderRadius: "0px", border: "none", cursor: "pointer", transition: "all 0.3s ease", background: i === slide ? "var(--accent)" : "rgba(255,255,255,0.3)" }}
             />
@@ -178,12 +178,12 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
           </h2>
         </div>
 
-        {landingContent?.goals?.items && landingContent.goals.items.some((i: any) => i.image) && (
+        {landingContent?.goals?.items && landingContent.goals.items.some((i: { image: string }) => i.image) && (
           <div style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
             <style>{`
               .local-goals-grid {
                 display: grid;
-                grid-template-columns: repeat(${landingContent.goals.items.filter((i: any) => i.image).length}, 1fr);
+                grid-template-columns: repeat(${landingContent.goals.items.filter((i: { image: string }) => i.image).length}, 1fr);
                 gap: 3px;
                 padding: 0;
               }
@@ -194,7 +194,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
               }
             `}</style>
             <div className="local-goals-grid">
-              {landingContent.goals.items.filter((i: any) => i.image).map((item: any, idx: number) => (
+              {landingContent.goals.items.filter((i: { image: string }) => i.image).map((item: any, idx: number) => (
                 <Link
                   key={idx}
                   href={item.categoryId ? `/products?category=${item.categoryId}` : `/products`}

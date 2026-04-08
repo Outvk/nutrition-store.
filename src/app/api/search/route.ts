@@ -6,15 +6,18 @@ export async function GET(request: Request) {
   const q = searchParams.get("q");
   const popular = searchParams.get("popular") === "true";
   const sale = searchParams.get("sale") === "true";
+  const categoryId = searchParams.get("category_id");
   
-  if (!popular && !sale && (!q || q.length < 2)) return NextResponse.json([]);
+  if (!popular && !sale && !categoryId && (!q || q.length < 2)) return NextResponse.json([]);
   
   const supabase = await createClient();
   let query = supabase.from("products")
     .select("id, name, price, sale_price, images, brand:brand_id(name)")
     .eq("is_active", true);
 
-  if (sale) {
+  if (categoryId) {
+    query = query.eq("category_id", categoryId).limit(10);
+  } else if (sale) {
     query = query.eq("is_on_sale", true).limit(5);
   } else if (q) {
     query = query.ilike("name", `%${q}%`);

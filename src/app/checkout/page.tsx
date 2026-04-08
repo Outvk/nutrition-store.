@@ -7,13 +7,14 @@ import { ChevronDown, Lock, Zap, Check } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { algeriaWilayas } from "@/lib/algeria-data";
-import { getCart, clearCart, CartItem } from "@/lib/cart";
+import { getCart, clearCart } from "@/lib/cart";
+import { CartItem } from "@/types";
 import { useEffect } from "react";
 
 import { STORE_CONFIG } from "@/lib/config";
+import { createClient as createSupabaseClient } from "@/lib/supabase/client";
 
-const DELIVERY_FEES = STORE_CONFIG.deliveryFees;
-const DEFAULT_FEE = STORE_CONFIG.defaultDeliveryFee;
+// Delivery fees are now fetched dynamically from Supabase RPC get_delivery_fee
 
 interface FieldProps {
   label: string;
@@ -21,7 +22,7 @@ interface FieldProps {
   placeholder?: string;
   type?: string;
   children?: React.ReactNode;
-  form: any;
+  form: Record<string, string>;
   setForm: React.Dispatch<React.SetStateAction<any>>;
   errors: Record<string, string>;
   setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
@@ -57,15 +58,39 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [loadingFee, setLoadingFee] = useState(false);
 
   useEffect(() => {
     setCartItems(getCart());
   }, []);
 
+  useEffect(() => {
+    if (!form.wilaya) {
+      setDeliveryFee(0);
+      return;
+    }
+
+    const fetchFee = async () => {
+      setLoadingFee(true);
+      try {
+        const supabase = createSupabaseClient();
+        const { data, error } = await supabase.rpc('get_delivery_fee', { p_wilaya_name: form.wilaya });
+        if (!error && data !== null) {
+          setDeliveryFee(Number(data));
+        }
+      } catch (err) {
+        console.error("Failed to fetch delivery fee", err);
+      } finally {
+        setLoadingFee(false);
+      }
+    };
+    fetchFee();
+  }, [form.wilaya]);
+
   const selectedWilayaData = algeriaWilayas.find(w => w.name === form.wilaya);
 
   const subtotal = cartItems.reduce((s, i) => s + (i.product.sale_price || i.product.price) * i.quantity, 0);
-  const deliveryFee = form.wilaya ? (DELIVERY_FEES[form.wilaya] || DEFAULT_FEE) : 0;
   const total = subtotal + deliveryFee;
 
   const validate = () => {
@@ -123,8 +148,9 @@ export default function CheckoutPage() {
       setTimeout(() => {
         router.push("/order-confirmed?id=" + orderId);
       }, 1500);
-    } catch (err: any) {
-      setApiError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Une erreur est survenue";
+      setApiError(message);
     } finally {
       setSubmitting(false);
     }
@@ -262,7 +288,9 @@ export default function CheckoutPage() {
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", color: "var(--text-secondary)" }}>
                     <span>Livraison {form.wilaya ? `(${form.wilaya})` : ""}</span>
-                    <span style={{ color: "var(--text-primary)" }}>{form.wilaya ? `${deliveryFee.toLocaleString()} DA` : "—"}</span>
+                    <span style={{ color: "var(--text-primary)" }}>
+                      {loadingFee ? "Calcul..." : (form.wilaya ? `${deliveryFee.toLocaleString()} DA` : "—")}
+                    </span>
                   </div>
                 </div>
 

@@ -1,5 +1,5 @@
 import DashboardClient from "./DashboardClient";
-import { getDashboardStats, getAllOrders } from "@/lib/supabase/queries";
+import { getDashboardStats, getAllOrders, getLowStock } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
 import { Order } from "@/types";
 
@@ -22,11 +22,7 @@ export default async function DashboardPage() {
   const orders = await getAllOrders();
   const recentOrders = orders.slice(0, 5);
 
-  const { data: lowStock } = await supabase
-    .from("variants")
-    .select("id, flavor, size, stock, product_id, products(name)")
-    .lte("stock", 5)
-    .order("stock", { ascending: true });
+  const lowStock = await getLowStock();
 
   const { count: activeProductsCount } = await supabase
     .from("products")

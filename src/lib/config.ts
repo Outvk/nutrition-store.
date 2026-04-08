@@ -19,17 +19,6 @@ export const STORE_CONFIG = {
 
   // Localization / Delivery
   currency: "DA",
-  defaultDeliveryFee: 700,
-  deliveryFees: {
-    "Alger": 400,
-    "Oran": 500,
-    "Constantine": 500,
-    "Annaba": 600,
-    "Blida": 400,
-    "Tizi Ouzou": 500,
-    "Béjaïa": 550,
-    "Sétif": 550,
-  } as Record<string, number>,
 
   // Aesthetics (CSS Variables reference)
   colors: {

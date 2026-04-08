@@ -1,6 +1,7 @@
 import { createClient } from './server'
+import { LandingContent } from '@/types'
 
-export async function getLandingContent() {
+export async function getLandingContent(): Promise<LandingContent | null> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('store_settings')
@@ -11,7 +12,7 @@ export async function getLandingContent() {
   return data?.landing_content || null
 }
 
-export async function updateLandingContent(content: any) {
+export async function updateLandingContent(content: LandingContent) {
   const supabase = await createClient()
   const { error } = await supabase
     .from('store_settings')

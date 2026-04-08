@@ -1,5 +1,6 @@
 import { createClient } from './server'
-import { Product, Brand, Category } from '@/types'
+import { Product, Brand, Category, OrderInsert, OrderItemInsert, DashboardStats, LowStockItem } from '@/types'
+import { AppError, StockError, NotFoundError } from '../errors'
 
 export async function getProducts(page = 0, filters: { brand_id?: string, category_id?: string, is_on_sale?: boolean } = {}, limit?: number): Promise<{ products: Product[], total: number }> {
   const supabase = await createClient()
@@ -17,14 +18,7 @@ export async function getProducts(page = 0, filters: { brand_id?: string, catego
   if (filters.is_on_sale !== undefined) query = query.eq('is_on_sale', filters.is_on_sale)
 
   const { data, count, error } = await query.range(from, to).order('created_at', { ascending: false })
-  if (error) {
-    console.error('getProducts error details:', {
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint
-    })
-  }
+  if (error) throw new AppError('InternalError', `Échec du chargement des produits: ${error.message}`, 500)
   return { products: (data as Product[]) || [], total: count || 0 }
 }
 
@@ -35,7 +29,10 @@ export async function getProductById(id: string): Promise<Product | null> {
     .select('*, variants(*), brand:brand_id(*), category:category_id(*)')
     .eq('id', id)
     .single()
-  if (error) console.error('getProductById error:', error)
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw new AppError('InternalError', `Échec du chargement du produit ${id}: ${error.message}`, 500)
+  }
   return data as Product | null
 }
 
@@ -46,7 +43,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
     .select('id, name, description, price, sale_price, images, is_on_sale, brand_id, category_id, is_active')
     .eq('is_active', true)
     .limit(4)
-  if (error) console.error('getFeaturedProducts error:', error)
+  if (error) throw new AppError('InternalError', `Fetch featured products failed: ${error.message}`, 500)
   return (data as Product[]) || []
 }
 
@@ -57,7 +54,7 @@ export async function getSaleProducts(): Promise<Product[]> {
     .select('id, name, description, price, sale_price, images, is_on_sale, brand_id, category_id, is_active')
     .eq('is_on_sale', true)
     .eq('is_active', true)
-  if (error) console.error('getSaleProducts error:', error)
+  if (error) throw new AppError('InternalError', `Fetch sale products failed: ${error.message}`, 500)
   return (data as Product[]) || []
 }
 
@@ -67,7 +64,7 @@ export async function getBrands(): Promise<Brand[]> {
     .from('brands')
     .select('id, name, logo_url')
     .eq('is_visible', true)
-  if (error) console.error('getBrands error:', error)
+  if (error) throw new AppError('InternalError', `Fetch brands failed: ${error.message}`, 500)
   return (data as Brand[]) || []
 }
 
@@ -76,7 +73,7 @@ export async function getCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from('categories')
     .select('id, name, slug, image_url')
-  if (error) console.error('getCategories error:', error)
+  if (error) throw new AppError('InternalError', `Fetch categories failed: ${error.message}`, 500)
   return (data as Category[]) || []
 }
 
@@ -98,50 +95,40 @@ export async function getAllOrders() {
     .from('orders')
     .select('id, full_name, phone, wilaya, address, total, delivery_fee, status, created_at')
     .order('created_at', { ascending: false })
-  if (error) console.error('getAllOrders error:', error)
+  if (error) throw new AppError('InternalError', `Fetch orders failed: ${error.message}`, 500)
   return data || []
 }
 
-export async function getDashboardStats() {
+export async function getDashboardStats(): Promise<DashboardStats | null> {
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('get_dashboard_stats')
-  if (error) console.error('getDashboardStats error:', error)
-  return data
+  if (error) throw new AppError('InternalError', `Échec du chargement des statistiques: ${error.message}`, 500)
+  return data as DashboardStats | null
 }
 
-export async function insertOrder(orderData: any, items: any[]) {
+export async function getLowStock(threshold = 5): Promise<LowStockItem[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('get_low_stock', { threshold })
+  if (error) console.error('getLowStock error:', error)
+  return (data as LowStockItem[]) || []
+}
+
+export async function insertOrder(orderData: OrderInsert, items: OrderItemInsert[]) {
   const supabase = await createClient()
   
-  const { data: order, error: orderError } = await supabase
-    .from('orders')
-    .insert([orderData])
-    .select('id')
-    .single()
+  const { data, error } = await supabase.rpc('place_order', {
+    p_order_data: orderData,
+    p_items: items
+  })
 
-  if (orderError) throw new Error(orderError.message)
-
-  const orderItemsWithId = items.map(item => ({
-    ...item,
-    order_id: order.id
-  }))
-
-  const { error: itemsError } = await supabase
-    .from('order_items')
-    .insert(orderItemsWithId)
-
-  if (itemsError) throw new Error(itemsError.message)
-
-  for (const item of items) {
-    if (item.variant_id) {
-      const { error: stockError } = await supabase.rpc('decrement_stock', {
-        p_variant_id: item.variant_id,
-        p_quantity: item.quantity
-      })
-      if (stockError) console.error('decrement_stock error for variant:', item.variant_id, stockError)
+  if (error) {
+    if (error.message.toLowerCase().includes('stock')) {
+      throw new StockError("Un ou plusieurs produits sont en rupture de stock.");
     }
+    throw new AppError('InternalError', `Échec de la commande: ${error.message}`, 500);
   }
 
-  return { orderId: order.id }
+  return { orderId: data as string }
 }
 
 export async function updateOrderStatus(id: string, status: string) {
@@ -171,6 +158,6 @@ export async function deleteOrder(id: string) {
     .delete()
     .eq('id', id)
   
-  if (error) console.error('deleteOrder error:', error)
-  return !error
+  if (error) throw new AppError('InternalError', `Échec de la suppression: ${error.message}`, 500)
+  return true
 }
