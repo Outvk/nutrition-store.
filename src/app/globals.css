@@ -254,8 +254,9 @@ body {
 .corner-plus {
   position: absolute;
   font-size: 22px;
-  color: #000;
+  color: #000000;
   font-weight: 900;
+  border: 1px dashed #444645;
   width: 22px;
   height: 22px;
   display: flex !important;
@@ -266,10 +267,10 @@ body {
   font-family: Arial, sans-serif;
   transition: all 0.2s ease;
 }
-.corner-plus.tl { top: -12px; left: -12px; }
-.corner-plus.tr { top: -12px; right: -12px; }
-.corner-plus.bl { bottom: -12px; left: -12px; }
-.corner-plus.br { bottom: -12px; right: -12px; }
+.corner-plus.tl { top: -15px; left: -15px; }
+.corner-plus.tr { top: -15px; right: -15px; }
+.corner-plus.bl { bottom: -15px; left: -15px; }
+.corner-plus.br { bottom: -15px; right: -15px; }
 
 @keyframes glitch-anim {
   0% { text-shadow: 2px 0 #ffff00, -2px 0 rgba(255,255,0,0.7); transform: translate(0); }
