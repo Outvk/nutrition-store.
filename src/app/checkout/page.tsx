@@ -53,7 +53,7 @@ const Field = ({ label, name, placeholder, type = "text", children, form, setFor
 export default function CheckoutPage() {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [form, setForm] = useState({ full_name: "", phone: "", wilaya: "", commune: "", address: "" });
+  const [form, setForm] = useState({ full_name: "", phone: "", wilaya: "", commune: "", address: "", livraison_type: "domicile" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -91,7 +91,10 @@ export default function CheckoutPage() {
   const selectedWilayaData = algeriaWilayas.find(w => w.name === form.wilaya);
 
   const subtotal = cartItems.reduce((s, i) => s + (i.product.sale_price || i.product.price) * i.quantity, 0);
-  const total = subtotal + deliveryFee;
+  const calculatedFee = form.wilaya 
+    ? (form.livraison_type === 'domicile' ? deliveryFee : Math.max(200, deliveryFee - 200)) 
+    : 0;
+  const total = subtotal + calculatedFee;
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -117,9 +120,9 @@ export default function CheckoutPage() {
         full_name: form.full_name.trim(),
         phone: form.phone,
         wilaya: form.wilaya,
-        address: `Domicile - ${form.commune} - ${form.address}`,
+        address: `${form.livraison_type === 'domicile' ? 'Domicile' : 'Stop Desk'} - ${form.commune} - ${form.address}`,
         total,
-        delivery_fee: deliveryFee,
+        delivery_fee: calculatedFee,
         items: cartItems.map(item => ({
           product_id: item.product.id,
           variant_id: item.variant?.id || null,
@@ -229,6 +232,49 @@ export default function CheckoutPage() {
                   />
                   {errors.address && <p style={{ fontSize: "12px", color: "#ff3b3b", marginTop: "6px" }}>{errors.address}</p>}
                 </Field>
+
+                <div style={{ marginBottom: "24px" }}>
+                  <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.08em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "12px" }}>
+                    MODE DE LIVRAISON <span style={{ color: "var(--accent)" }}>*</span>
+                  </label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                    <label style={{ 
+                      display: "flex", alignItems: "center", gap: "10px", padding: "14px", 
+                      border: `1px solid ${form.livraison_type === 'domicile' ? 'var(--accent)' : 'var(--border)'}`, 
+                      background: form.livraison_type === 'domicile' ? "rgba(232, 255, 0, 0.05)" : "transparent",
+                      cursor: "pointer", transition: "all 0.2s ease" 
+                    }}>
+                      <input 
+                        type="radio" 
+                        name="livraison_type" 
+                        value="domicile" 
+                        checked={form.livraison_type === 'domicile'} 
+                        onChange={e => setForm(f => ({ ...f, livraison_type: e.target.value }))}
+                        style={{ accentColor: "var(--accent)" }}
+                      />
+                      <span style={{ fontSize: "14px", fontWeight: 600 }}>À DOMICILE</span>
+                    </label>
+                    <label style={{ 
+                      display: "flex", alignItems: "center", gap: "10px", padding: "14px", 
+                      border: `1px solid ${form.livraison_type === 'stopdesk' ? 'var(--accent)' : 'var(--border)'}`, 
+                      background: form.livraison_type === 'stopdesk' ? "rgba(232, 255, 0, 0.05)" : "transparent",
+                      cursor: "pointer", transition: "all 0.2s ease" 
+                    }}>
+                      <input 
+                        type="radio" 
+                        name="livraison_type" 
+                        value="stopdesk" 
+                        checked={form.livraison_type === 'stopdesk'} 
+                        onChange={e => setForm(f => ({ ...f, livraison_type: e.target.value }))}
+                        style={{ accentColor: "var(--accent)" }}
+                      />
+                      <span style={{ fontSize: "14px", fontWeight: 600 }}>STOP DESK</span>
+                    </label>
+                  </div>
+                  <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "8px" }}>
+                    * Stop Desk : Récupérez votre colis au bureau du transporteur le plus proche.
+                  </p>
+                </div>
               </div>
 
               {/* Payment method */}
@@ -287,9 +333,9 @@ export default function CheckoutPage() {
                     <span style={{ color: "var(--text-primary)" }}>{subtotal.toLocaleString()} DA</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px", color: "var(--text-secondary)" }}>
-                    <span>Livraison {form.wilaya ? `(${form.wilaya})` : ""}</span>
+                    <span>Livraison {form.wilaya ? `(${form.wilaya} — ${form.livraison_type === 'domicile' ? 'Domicile' : 'Stop Desk'})` : ""}</span>
                     <span style={{ color: "var(--text-primary)" }}>
-                      {loadingFee ? "Calcul..." : (form.wilaya ? `${deliveryFee.toLocaleString()} DA` : "—")}
+                      {loadingFee ? "Calcul..." : (form.wilaya ? `${calculatedFee.toLocaleString()} DA` : "—")}
                     </span>
                   </div>
                 </div>

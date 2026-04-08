@@ -25,11 +25,30 @@ export default function Navbar() {
   // Search state
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   useEffect(() => {
     setMounted(true);
+    const saved = localStorage.getItem("recent_searches");
+    if (saved) setRecentSearches(JSON.parse(saved));
   }, []);
+
+  const saveRecentSearch = (term: string) => {
+    if (!term || term.length < 2) return;
+    const cleanTerm = term.trim().toLowerCase();
+    setRecentSearches(prev => {
+      const filtered = prev.filter(s => s !== cleanTerm);
+      const updated = [cleanTerm, ...filtered].slice(0, 5);
+      localStorage.setItem("recent_searches", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem("recent_searches");
+  };
 
   const [hovered, setHovered] = useState<string | null>(null);
   const [saleProducts, setSaleProducts] = useState<Product[]>([]);
@@ -56,6 +75,9 @@ export default function Navbar() {
         console.error("Search failed", e);
       } finally {
         setIsSearching(false);
+        if (searchQuery.length > 2) {
+          saveRecentSearch(searchQuery);
+        }
       }
     };
 
@@ -642,27 +664,37 @@ export default function Navbar() {
 
               {!isMobile && (
                 <div style={{ marginBottom: "40px" }}>
-                  <h4 style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, marginBottom: "20px" }}>RECHERCHES RÉCENTES</h4>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "20px" }}>
+                    <h4 style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.15em", color: "#999", fontWeight: 800, margin: 0 }}>RECHERCHES RÉCENTES</h4>
+                    {recentSearches.length > 0 && (
+                      <button onClick={clearRecentSearches} style={{ background: "none", border: "none", fontSize: "10px", color: "#ff6262ff", cursor: "pointer", fontWeight: 600 }}>EFFACER</button>
+                    )}
+                  </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                    {["boo", "burn", "bur", "bi", "bo", "boas", "boa", "crea"].map(item => (
-                      <button 
-                        key={item} 
-                        onClick={() => setSearchQuery(item)} 
-                        style={{ 
-                          background: "#fff", 
-                          border: "1px solid #ddd", 
-                          color: "#444", 
-                          padding: "5px 10px",
-                          fontSize: "12px", 
-                          fontFamily: "var(--font-condensed)", 
-                          cursor: "pointer", 
-                          transition: "all 0.2s",
-                          borderRadius: "4px",
-                        }} 
-                      >
-                        {item}
-                      </button>
-                    ))}
+                    {recentSearches.length > 0 ? (
+                      recentSearches.map(item => (
+                        <button 
+                          key={item} 
+                          onClick={() => setSearchQuery(item)} 
+                          style={{ 
+                            background: "#fff", 
+                            border: "1px solid #ddd", 
+                            color: "#444", 
+                            padding: "5px 10px",
+                            fontSize: "12px", 
+                            fontFamily: "var(--font-condensed)", 
+                            cursor: "pointer", 
+                            transition: "all 0.2s",
+                            borderRadius: "4px",
+                            textTransform: "uppercase"
+                          }} 
+                        >
+                          {item}
+                        </button>
+                      ))
+                    ) : (
+                      <p style={{ fontSize: "11px", color: "#ccc" }}>Aucune recherche récente</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -720,7 +752,14 @@ export default function Navbar() {
                             {p.images?.[0] && <Image src={p.images[0]} alt={p.name} fill style={{ objectFit: "contain", padding: isMobile ? "12px" : "24px" }} />}
                           </div>
                           <p style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: isMobile ? "13px" : "15px", color: "#000", height: isMobile ? "32px" : "40px", overflow: "hidden" }}>{p.name.toUpperCase()}</p>
-                          <p style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? "16px" : "20px", color: "#000" }}>{p.price.toLocaleString()} DA</p>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+                            <p style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? "16px" : "20px", color: p.sale_price ? "var(--accent)" : "#000" }}>
+                              {(p.sale_price || p.price).toLocaleString()} DA
+                            </p>
+                            {p.sale_price && (
+                              <p style={{ fontSize: "12px", color: "#999", textDecoration: "line-through" }}>{p.price.toLocaleString()} DA</p>
+                            )}
+                          </div>
                         </Link>
                       ))}
                     </div>
@@ -744,7 +783,14 @@ export default function Navbar() {
                           {p.images?.[0] && <Image src={p.images[0]} alt={p.name} fill style={{ objectFit: "contain", padding: isMobile ? "12px" : "24px" }} />}
                         </div>
                         <p style={{ fontFamily: "var(--font-condensed)", fontWeight: 700, fontSize: isMobile ? "13px" : "15px", color: "#000", height: isMobile ? "32px" : "40px", overflow: "hidden" }}>{p.name.toUpperCase()}</p>
-                        <p style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? "16px" : "20px", color: "#000" }}>{p.price.toLocaleString()} DA</p>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+                          <p style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? "16px" : "20px", color: p.sale_price ? "var(--accent)" : "#000" }}>
+                            {(p.sale_price || p.price).toLocaleString()} DA
+                          </p>
+                          {p.sale_price && (
+                            <p style={{ fontSize: "12px", color: "#999", textDecoration: "line-through" }}>{p.price.toLocaleString()} DA</p>
+                          )}
+                        </div>
                       </Link>
                     ))}
                   </div>

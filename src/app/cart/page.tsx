@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Trash2, ArrowRight, ShoppingBag } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getCart, CartItem, removeFromCart, updateQuantity } from "@/lib/cart";
+import { getCart, removeFromCart, updateQuantity } from "@/lib/cart";
+import { CartItem } from "@/types";
 import { useEffect } from "react";
 
 export default function CartPage() {

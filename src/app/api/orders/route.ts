@@ -24,6 +24,7 @@ const orderSchema = z.object({
     })
   ).min(1).max(20),
   turnstileToken: z.string(),
+  livraison_type: z.enum(['domicile', 'stopdesk']).optional().default('domicile'),
 });
 
 export async function POST(req: Request) {
@@ -33,15 +34,12 @@ export async function POST(req: Request) {
     const realIp = req.headers.get('x-real-ip');
     const ip = forwarded ? forwarded.split(',')[0] : (realIp || '127.0.0.1');
 
-    // 3. rate limit by IP (Skip in local dev if needed, or use high limit)
-    const canLimit = ratelimit && process.env.NODE_ENV === 'production';
-    // If not production, use separate key for local testing
     const limitKey = `order_${process.env.NODE_ENV === 'production' ? ip : 'local_dev'}`;
-    
+
     if (ratelimit) {
       const { success, limit, reset, remaining } = await ratelimit.limit(limitKey);
       if (!success) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'Trop de tentatives. Veuillez réessayer plus tard.',
           limit,
           remaining,
@@ -52,12 +50,12 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    // 4. check honeypot
+    // Check honeypot
     if (body.website) {
       return NextResponse.json({ error: 'Invalid submission' }, { status: 400 });
     }
 
-    // 2. Validate using Zod
+    // Validate using Zod
     const result = orderSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json({ error: 'Validation failed', details: result.error.issues }, { status: 400 });
@@ -65,7 +63,7 @@ export async function POST(req: Request) {
 
     const { turnstileToken, items, ...orderData } = result.data;
 
-    // 1. Verify Cloudflare Turnstile token
+    // Verify Cloudflare Turnstile token
     const hasValidTurnstile = process.env.TURNSTILE_SECRET && !process.env.TURNSTILE_SECRET.includes("your-");
     if (hasValidTurnstile) {
       const formData = new URLSearchParams();
@@ -84,8 +82,22 @@ export async function POST(req: Request) {
       }
     }
 
-    // 1.5. SERVER-SIDE PRICE VALIDATION (TASK 3)
     const supabase = await createClient();
+
+    // ✅ FIX: Validate delivery_fee server-side using the wilaya RPC
+    const { data: serverFee, error: feeError } = await supabase
+      .rpc('get_delivery_fee', { p_wilaya_name: orderData.wilaya });
+
+    if (feeError || serverFee === null || serverFee === undefined) {
+      return NextResponse.json({ error: 'Impossible de calculer les frais de livraison.' }, { status: 400 });
+    }
+
+    // Adjust fee server-side if stopdesk
+    const finalFee = orderData.livraison_type === 'stopdesk' 
+      ? Math.max(200, Number(serverFee) - 200) 
+      : Number(serverFee);
+
+    // SERVER-SIDE PRICE VALIDATION
     const productIds = Array.from(new Set(items.map(i => i.product_id)));
     const { data: dbProducts, error: dbError } = await supabase
       .from('products')
@@ -98,17 +110,12 @@ export async function POST(req: Request) {
 
     const priceMap = new Map(dbProducts.map(p => [p.id, p]));
     let serverTotal = 0;
-    
-    // Check for inactive products and verify existence
-    for (const item of items) {
-      const dbProd = priceMap.get(item.product_id);
-      if (!dbProd || !dbProd.is_active) {
-        return NextResponse.json({ error: `Le produit ${item.product_id} est inactif ou indisponible.` }, { status: 400 });
-      }
-    }
 
     const validatedItems = items.map(item => {
-      const dbProd = priceMap.get(item.product_id)!;
+      const dbProd = priceMap.get(item.product_id);
+      if (!dbProd || !dbProd.is_active) {
+        throw new AppError('ValidationError', 'Un ou plusieurs produits sont indisponibles.', 400);
+      }
       const actualPrice = dbProd.sale_price ?? dbProd.price;
       serverTotal += actualPrice * item.quantity;
       return {
@@ -117,12 +124,17 @@ export async function POST(req: Request) {
       };
     });
 
-    const finalTotal = serverTotal + orderData.delivery_fee;
-    const finalOrderData = { ...orderData, total: finalTotal };
+    // ✅ FIX: Use server-computed delivery_fee, not the client's value
+    const finalTotal = serverTotal + finalFee;
+    const finalOrderData = {
+      ...orderData,
+      delivery_fee: finalFee,   // override client value
+      total: finalTotal,        // override client value
+    };
 
-    // 5. Insert order + order_items using validated data
+    // Insert order + order_items using validated data
     const { orderId } = await insertOrder(finalOrderData, validatedItems);
-    
+
     return NextResponse.json({ orderId });
   } catch (error: unknown) {
     console.error('Order API Error:', error);

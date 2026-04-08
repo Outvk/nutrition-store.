@@ -12,8 +12,9 @@ import { addToCart } from "@/lib/cart";
 
 import { STORE_CONFIG } from "@/lib/config";
 
-const DELIVERY_FEES = STORE_CONFIG.deliveryFees;
-const DEFAULT_FEE = STORE_CONFIG.defaultDeliveryFee;
+import { createClient as createSupabaseClient } from "@/lib/supabase/client";
+
+// Delivery fees are now fetched dynamically from Supabase RPC get_delivery_fee
 
 interface ProductDetailClientProps {
   product: Product;
@@ -40,6 +41,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const [orderError, setOrderError] = useState("");
   const [activeTab, setActiveTab] = useState("description");
   const [isMobile, setIsMobile] = useState(false);
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [loadingFee, setLoadingFee] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -52,10 +55,33 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const discount = product.sale_price ? Math.round(((product.price - product.sale_price) / product.price) * 100) : 0;
   const totalStock = (product.variants || []).reduce((acc: number, v: any) => acc + v.stock, 0);
 
+  useEffect(() => {
+    const currentWilayaName = algeriaWilayas.find(w => w.code === selectedWilaya)?.name;
+    if (!currentWilayaName) {
+      setDeliveryFee(0);
+      return;
+    }
+
+    const fetchFee = async () => {
+      setLoadingFee(true);
+      try {
+        const supabase = createSupabaseClient();
+        const { data, error } = await supabase.rpc('get_delivery_fee', { p_wilaya_name: currentWilayaName });
+        if (!error && data !== null) {
+          setDeliveryFee(Number(data));
+        }
+      } catch (err) {
+        console.error("Failed to fetch delivery fee", err);
+      } finally {
+        setLoadingFee(false);
+      }
+    };
+    fetchFee();
+  }, [selectedWilaya]);
+
   const currentWilayaName = algeriaWilayas.find(w => w.code === selectedWilaya)?.name || "";
-  const baseFee = currentWilayaName ? (DELIVERY_FEES[currentWilayaName] || DEFAULT_FEE) : 0;
-  const deliveryFee = selectedWilaya ? (livraisonType === 'domicile' ? baseFee : Math.max(200, baseFee - 200)) : 0;
-  const totalWithShipping = ((product.sale_price || product.price) * qty) + deliveryFee;
+  const calculatedFee = selectedWilaya ? (livraisonType === 'domicile' ? deliveryFee : Math.max(200, deliveryFee - 200)) : 0;
+  const totalWithShipping = ((product.sale_price || product.price) * qty) + calculatedFee;
 
   const handleAddToCart = () => {
     if (selectedVariant) {
@@ -357,7 +383,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                     wilaya: currentWilayaName,
                     address: `${livraisonType === 'domicile' ? 'Domicile' : 'Stop Desk'} - ${commune} - ${adresse}`,
                     total: totalWithShipping,
-                    delivery_fee: deliveryFee,
+                    delivery_fee: calculatedFee,
                     items: [{
                       product_id: product.id,
                       variant_id: selectedVariant.id,
@@ -466,7 +492,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Frais de livraison:</span>
                     <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--accent)" }}>
-                      {selectedWilaya ? `${deliveryFee.toLocaleString()} DA` : "Choisir wilaya"}
+                      {loadingFee ? "Calcul..." : (selectedWilaya ? `${calculatedFee.toLocaleString()} DA` : "Choisir wilaya")}
                     </span>
                   </div>
                 </div>
