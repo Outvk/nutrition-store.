@@ -319,7 +319,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                         <p style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700, letterSpacing: "0.08em", marginBottom: "6px" }}>PRODUITS COMMANDÉS</p>
                         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                           {order.items?.map((item: any) => (
-                            <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.05)", pb: "6px" }}>
+                            <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "6px" }}>
                               <div style={{ flex: 1 }}>
                                 <p style={{ fontSize: "14px", fontWeight: 600 }}>{item.products?.name}</p>
                                 <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>{item.variants?.flavor} {item.variants?.size && `/ ${item.variants?.size}`}</p>
