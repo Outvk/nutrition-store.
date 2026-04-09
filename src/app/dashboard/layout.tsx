@@ -128,12 +128,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       `}} />
 
       {/* Sidebar - Permanent and Responsive */}
-      <div className="dash-sidebar-container" style={{ width: "240px", flexShrink: 0, position: "sticky", top: 0, height: "100vh", borderRight: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
+      <div className="dash-sidebar-container" style={{ 
+        width: "240px", 
+        flexShrink: 0, 
+        position: "fixed", 
+        left: 0,
+        top: 0, 
+        height: "100vh", 
+        borderRight: "1px solid var(--border)", 
+        background: "var(--bg-secondary)",
+        zIndex: 50
+      }}>
         <Sidebar className="dash-sidebar-header" />
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, marginLeft: "240px" }} className="dash-main-content">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (max-width: 767px) {
+            .dash-sidebar-container { position: sticky !important; width: 100% !important; height: auto !important; z-index: 100 !important; }
+            .dash-main-content { margin-left: 0 !important; }
+          }
+        `}} />
         <main style={{ flex: 1, padding: "clamp(16px, 4vw, 32px)", maxWidth: "1400px", width: "100%" }}>
           {children}
         </main>

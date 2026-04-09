@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Brand, Product } from "@/types";
 import ProductCard from "@/components/ProductCard";
 import { ChevronRight, Filter, Search } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface BrandsClientProps {
   brands: Brand[];
@@ -12,6 +13,7 @@ interface BrandsClientProps {
 }
 
 export default function BrandsClient({ brands, initialProducts }: BrandsClientProps) {
+  const { t, locale, dir } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(false);
 
@@ -51,33 +53,34 @@ export default function BrandsClient({ brands, initialProducts }: BrandsClientPr
     <div className="container" style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 24px" }}>
       {/* Header Section */}
       <div style={{ marginBottom: "64px", textAlign: "center" }}>
-        <p style={{ fontFamily: "var(--font-condensed)", fontSize: "14px", letterSpacing: "0.2em", color: "var(--accent)", fontWeight: 700, marginBottom: "12px", textTransform: "uppercase" }}>
-          NOS PARTENAIRES OFFICIELS
+        <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "14px", letterSpacing: "0.2em", color: "var(--accent)", fontWeight: 700, marginBottom: "12px", textTransform: "uppercase" }}>
+          {locale === 'ar' ? "شركاؤنا الرسميون" : "NOS PARTENAIRES OFFICIELS"}
         </p>
-        <h1 className="section-heading" style={{ fontSize: "clamp(40px, 8vw, 84px)", lineHeight: "0.9", marginBottom: "32px", color: "#fff" }}>
-          TOUTES LES <br /><span style={{ color: "var(--accent)" }}>MARQUES</span>
+        <h1 className="section-heading" style={{ fontSize: "clamp(40px, 8vw, 84px)", lineHeight: "0.9", marginBottom: "32px", color: "#fff", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+          {locale === 'ar' ? <>جميع <br /><span style={{ color: "var(--accent)" }}>العلامات</span></> : <>TOUTES LES <br /><span style={{ color: "var(--accent)" }}>MARQUES</span></>}
         </h1>
         
         {/* Search Bar */}
         <div style={{ maxWidth: "500px", margin: "0 auto", position: "relative" }}>
-          <Search size={20} style={{ position: "absolute", left: "20px", top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.4)" }} />
+          <Search size={20} style={{ position: "absolute", [locale === 'ar' ? 'right' : 'left']: "20px", top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.4)" }} />
           <input 
             type="text" 
-            placeholder="Rechercher une marque..."
+            placeholder={locale === 'ar' ? "ابحث عن علامة تجارية..." : "Rechercher une marque..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: "100%",
               background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.1)",
-              padding: "18px 24px 18px 56px",
+              padding: locale === 'ar' ? "18px 56px 18px 24px" : "18px 24px 18px 56px",
               color: "#fff",
               fontSize: "16px",
-              fontFamily: "var(--font-condensed)",
+              fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)',
               letterSpacing: "0.05em",
               borderRadius: "0px",
               outline: "none",
-              transition: "border-color 0.3s ease"
+              transition: "border-color 0.3s ease",
+              textAlign: locale === 'ar' ? 'right' : 'left'
             }}
             onFocus={(e) => e.target.style.borderColor = "var(--accent)"}
             onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
@@ -172,11 +175,11 @@ export default function BrandsClient({ brands, initialProducts }: BrandsClientPr
                   </div>
                 )}
                 <div>
-                  <h2 className="section-heading" style={{ fontSize: "24px", color: "#fff", margin: 0, letterSpacing: "0.05em" }}>
+                  <h2 className="section-heading" style={{ fontSize: "24px", color: "#fff", margin: 0, letterSpacing: "0.05em", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
                     {brand.name.toUpperCase()}
                   </h2>
-                  <p style={{ fontSize: "12px", color: "var(--accent)", fontFamily: "var(--font-condensed)", marginTop: "4px", fontWeight: 700 }}>
-                    {products.length} PRODUITS
+                  <p style={{ fontSize: "12px", color: "var(--accent)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', marginTop: "4px", fontWeight: 700 }}>
+                    {products.length} {locale === 'ar' ? "منتجات" : "PRODUITS"}
                   </p>
                 </div>
               </div>
@@ -204,7 +207,7 @@ export default function BrandsClient({ brands, initialProducts }: BrandsClientPr
                   background: "var(--accent)",
                   color: "#000",
                   textDecoration: "none",
-                  fontFamily: "var(--font-condensed)",
+                  fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)',
                   fontSize: "14px",
                   fontWeight: 800,
                   letterSpacing: "0.05em",
@@ -214,7 +217,8 @@ export default function BrandsClient({ brands, initialProducts }: BrandsClientPr
                 onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
                 onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
               >
-                VOIR LA COLLECTION <ChevronRight size={16} />
+                {locale === 'ar' ? "عرض المجموعة" : "VOIR LA COLLECTION"} 
+                {locale === 'ar' ? <ChevronRight size={16} style={{ transform: 'scaleX(-1)' }} /> : <ChevronRight size={16} />}
               </Link>
             </section>
           );

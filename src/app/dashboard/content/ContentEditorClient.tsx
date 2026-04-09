@@ -168,7 +168,7 @@ export default function ContentEditorClient({ initialContent }: { initialContent
 
       <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: "40px", alignItems: "start" }}>
         {/* Navigation Sidebar */}
-        <div style={{ position: "sticky", top: "100px", display: "flex", flexDirection: "column", gap: "4px" }}>
+        <div style={{ position: "sticky", top: "32px", display: "flex", flexDirection: "column", gap: "4px" }}>
           {tabs.map(tab => {
             const active = activeTab === tab.id;
             return (

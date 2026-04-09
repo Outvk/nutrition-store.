@@ -371,7 +371,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
               <Countdown targetDate={saleTarget} />
             </div>
             
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "60px" }}>
               <Link href="/products?filter=sale" 
                 style={{ 
                   textDecoration: "none", 
@@ -540,10 +540,10 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
               </div>
             ))}
           </div>
-          <div style={{ textAlign: "center", padding: "24px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "8px" }}>
-            <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "15px", letterSpacing: "0.06em", color: "var(--text-secondary)", marginBottom: "4px" }}>{t("home.deliveryCarrier")}</p>
-            <span style={{ fontFamily: "var(--font-display)", fontSize: "32px", letterSpacing: "0.08em", color: "var(--accent)" }}>NOEST-DZ</span>
-            <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "8px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("home.deliveryCOD")}</p>
+          <div style={{ textAlign: "center", padding: "40px 24px", background: "rgba(255,255,255,0.02)", border: "1px dashed var(--border)", borderRadius: "0px" }}>
+            <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "14px", letterSpacing: "0.15em", color: "var(--text-secondary)", marginBottom: "8px" }}>{t("home.deliveryCarrier")}</p>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "42px", letterSpacing: "0.1em", color: "var(--accent)", fontWeight: 800 }}>NOEST-DZ</span>
+            <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "12px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit', textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("home.deliveryCOD")}</p>
           </div>
         </div>
       </section>
