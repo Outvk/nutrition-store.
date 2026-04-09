@@ -21,13 +21,18 @@ export default function ContentEditorClient({ initialContent }: { initialContent
   const [activeTab, setActiveTab] = useState("hero");
   const [saving, setSaving] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
   const router = useRouter();
 
   useEffect(() => {
     const fetchProducts = async () => {
       const supabase = createClient();
-      const { data } = await supabase.from("products").select("*, brand:brands(*)").order("name");
-      if (data) setProducts(data);
+      const [{ data: prodData }, { data: catData }] = await Promise.all([
+        supabase.from("products").select("*, brand:brands(*)").order("name"),
+        supabase.from("categories").select("*").order("name")
+      ]);
+      if (prodData) setProducts(prodData);
+      if (catData) setCategories(catData);
     };
     fetchProducts();
   }, []);
@@ -35,10 +40,10 @@ export default function ContentEditorClient({ initialContent }: { initialContent
   const defaults = {
     hero: {
       slides: [
-        { tag: "", title: "", sub: "", cta: "", image: "", href: "" },
-        { tag: "", title: "", sub: "", cta: "", image: "", href: "" },
-        { tag: "", title: "", sub: "", cta: "", image: "", href: "" },
-        { tag: "", title: "", sub: "", cta: "", image: "", href: "" }
+        { tag: "", tagAr: "", title: "", titleAr: "", sub: "", subAr: "", cta: "", ctaAr: "", image: "", href: "" },
+        { tag: "", tagAr: "", title: "", titleAr: "", sub: "", subAr: "", cta: "", ctaAr: "", image: "", href: "" },
+        { tag: "", tagAr: "", title: "", titleAr: "", sub: "", subAr: "", cta: "", ctaAr: "", image: "", href: "" },
+        { tag: "", tagAr: "", title: "", titleAr: "", sub: "", subAr: "", cta: "", ctaAr: "", image: "", href: "" }
       ]
     },
     brands: { label: "PARTENAIRES", heading: "MARQUES UNIVERSELLES" },
@@ -46,10 +51,10 @@ export default function ContentEditorClient({ initialContent }: { initialContent
       label: "CHOISISSEZ VOTRE VOIE",
       heading: "QUEL EST VOTRE OBJECTIF ?",
       items: [
-        { label: "", image: "", categoryId: "" },
-        { label: "", image: "", categoryId: "" },
-        { label: "", image: "", categoryId: "" },
-        { label: "", image: "", categoryId: "" }
+        { label: "", labelAr: "", image: "", categoryId: "" },
+        { label: "", labelAr: "", image: "", categoryId: "" },
+        { label: "", labelAr: "", image: "", categoryId: "" },
+        { label: "", labelAr: "", image: "", categoryId: "" }
       ]
     },
     promo: { 
@@ -161,7 +166,7 @@ export default function ContentEditorClient({ initialContent }: { initialContent
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: "40px", alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: "40px", alignItems: "start" }}>
         {/* Navigation Sidebar */}
         <div style={{ position: "sticky", top: "100px", display: "flex", flexDirection: "column", gap: "4px" }}>
           {tabs.map(tab => {
@@ -226,39 +231,69 @@ export default function ContentEditorClient({ initialContent }: { initialContent
 
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                         <div>
-                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>LABEL (TAG)</label>
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>LABEL (TAG) [FR]</label>
                           <input type="text" value={s.tag} onChange={e => handleHeroSlideUpdate(idx, "tag", e.target.value)}
                             style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "13px" }}
                           />
                         </div>
                         <div>
-                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>LIEN (HREF)</label>
-                          <input type="text" value={s.href} onChange={e => handleHeroSlideUpdate(idx, "href", e.target.value)}
-                            style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "13px" }}
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>LABEL (TAG) [AR]</label>
+                          <input type="text" value={s.tagAr || ""} onChange={e => handleHeroSlideUpdate(idx, "tagAr", e.target.value)}
+                            style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "13px", textAlign: "right", direction: "rtl", fontFamily: "var(--font-cairo)" }}
                           />
                         </div>
                       </div>
 
-                      <div>
-                        <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>TITRE PRINCIPAL</label>
-                        <textarea rows={2} value={s.title} onChange={e => handleHeroSlideUpdate(idx, "title", e.target.value)}
-                          style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "18px", fontFamily: "var(--font-display)" }}
-                        />
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                        <div>
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>TITRE PRINCIPAL [FR]</label>
+                          <textarea rows={2} value={s.title} onChange={e => handleHeroSlideUpdate(idx, "title", e.target.value)}
+                            style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "18px", fontFamily: "var(--font-display)" }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>TITRE PRINCIPAL [AR]</label>
+                          <textarea rows={2} value={s.titleAr || ""} onChange={e => handleHeroSlideUpdate(idx, "titleAr", e.target.value)}
+                            style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "18px", textAlign: "right", direction: "rtl", fontFamily: "var(--font-cairo)" }}
+                          />
+                        </div>
                       </div>
 
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                         <div>
-                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>SOUS-TITRE</label>
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>SOUS-TITRE [FR]</label>
                           <input type="text" value={s.sub} onChange={e => handleHeroSlideUpdate(idx, "sub", e.target.value)}
                             style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "13px" }}
                           />
                         </div>
                         <div>
-                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>MODALITÉ BOUTON (CTA)</label>
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>SOUS-TITRE [AR]</label>
+                          <input type="text" value={s.subAr || ""} onChange={e => handleHeroSlideUpdate(idx, "subAr", e.target.value)}
+                            style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "13px", textAlign: "right", direction: "rtl", fontFamily: "var(--font-cairo)" }}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                        <div>
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>MODALITÉ BOUTON (CTA) [FR]</label>
                           <input type="text" value={s.cta} onChange={e => handleHeroSlideUpdate(idx, "cta", e.target.value)}
                             style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "13px" }}
                           />
                         </div>
+                        <div>
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>MODALITÉ BOUTON (CTA) [AR]</label>
+                          <input type="text" value={s.ctaAr || ""} onChange={e => handleHeroSlideUpdate(idx, "ctaAr", e.target.value)}
+                            style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "13px", textAlign: "right", direction: "rtl", fontFamily: "var(--font-cairo)" }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                          <label style={{ display: "block", fontFamily: "var(--font-condensed)", fontSize: "11px", letterSpacing: "0.1em", fontWeight: 700, color: "var(--text-muted)", marginBottom: "8px" }}>LIEN (HREF)</label>
+                          <input type="text" value={s.href} onChange={e => handleHeroSlideUpdate(idx, "href", e.target.value)}
+                            style={{ width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", padding: "12px 16px", color: "#fff", fontSize: "13px" }}
+                          />
                       </div>
                     </div>
                   </div>
@@ -316,11 +351,19 @@ export default function ContentEditorClient({ initialContent }: { initialContent
                   <div key={idx} style={{ padding: "16px", border: "1px solid var(--border)", background: "rgba(255,255,255,0.01)" }}>
                     <p style={{ fontFamily: "var(--font-condensed)", fontSize: "11px", fontWeight: 800, color: "var(--accent)", marginBottom: "12px" }}>CARTE {idx + 1}</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                      <div>
-                        <label style={{ display: "block", fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>LABEL</label>
-                        <input type="text" value={item.label} onChange={e => handleGoalItemUpdate(idx, "label", e.target.value)}
-                          style={{ width: "100%", background: "rgba(0,0,0,0.2)", border: "1px solid var(--border)", padding: "8px", color: "#fff", fontSize: "12px" }}
-                        />
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ display: "block", fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>LABEL [FR]</label>
+                          <input type="text" value={item.label} onChange={e => handleGoalItemUpdate(idx, "label", e.target.value)}
+                            style={{ width: "100%", background: "rgba(0,0,0,0.2)", border: "1px solid var(--border)", padding: "8px", color: "#fff", fontSize: "12px" }}
+                          />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <label style={{ display: "block", fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>LABEL [AR]</label>
+                          <input type="text" value={item.labelAr || ""} onChange={e => handleGoalItemUpdate(idx, "labelAr", e.target.value)}
+                            style={{ width: "100%", background: "rgba(0,0,0,0.2)", border: "1px solid var(--border)", padding: "8px", color: "#fff", fontSize: "12px", textAlign: "right", direction: "rtl", fontFamily: "var(--font-cairo)" }}
+                          />
+                        </div>
                       </div>
                       <div>
                         <label style={{ display: "block", fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>IMAGE URL</label>
@@ -336,6 +379,17 @@ export default function ContentEditorClient({ initialContent }: { initialContent
                              )}
                           </div>
                         </div>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px" }}>CATÉGORIE CIBLE (LIEN)</label>
+                        <select value={item.categoryId || ""} onChange={e => handleGoalItemUpdate(idx, "categoryId", e.target.value)}
+                           style={{ width: "100%", background: "rgba(0,0,0,0.2)", border: "1px solid var(--border)", padding: "8px", color: "#fff", fontSize: "12px", outline: "none" }}
+                        >
+                          <option value="">-- Sans lien --</option>
+                          {categories.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </div>

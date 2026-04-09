@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ShoppingCart, Zap, Shield, Truck, Package, MessageCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -20,6 +21,7 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
+  const router = useRouter();
   const { t, locale } = useLanguage();
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null);
   const [qty, setQty] = useState(1);
@@ -87,6 +89,13 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       addToCart(product, selectedVariant, qty);
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (selectedVariant && selectedVariant.stock > 0) {
+      addToCart(product, selectedVariant, qty);
+      router.push("/checkout");
     }
   };
 
@@ -304,22 +313,25 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               </button>
             </div>
 
-            <Link href={selectedVariant && selectedVariant.stock > 0 ? "/checkout" : "#"}
+            <button
+              onClick={handleBuyNow}
+              disabled={!selectedVariant || selectedVariant.stock === 0}
               style={{ 
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", 
                 padding: "14px 24px", borderRadius: "0", background: "transparent", 
-                border: "1px solid var(--border-bright)", textDecoration: "none", 
+                border: "1px solid var(--border-bright)", 
                 color: "var(--text-primary)", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', 
                 fontWeight: 700, fontSize: "15px", letterSpacing: "0.06em", 
                 marginBottom: "28px", transition: "all 0.2s ease",
                 opacity: (selectedVariant && selectedVariant.stock > 0) ? 1 : 0.5,
-                pointerEvents: (selectedVariant && selectedVariant.stock > 0) ? "auto" : "none"
+                cursor: (selectedVariant && selectedVariant.stock > 0) ? "pointer" : "not-allowed",
+                width: "100%"
               }}
               onMouseEnter={e => { if (selectedVariant && selectedVariant.stock > 0) { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; } }}
               onMouseLeave={e => { if (selectedVariant && selectedVariant.stock > 0) { e.currentTarget.style.borderColor = "var(--border-bright)"; e.currentTarget.style.color = "var(--text-primary)"; } }}
             >
               <Zap size={16} /> {t("common.buyNow")}
-            </Link>
+            </button>
 
             {/* Guarantees */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "20px", background: "var(--bg-secondary)", borderRadius: "0", border: "1px solid var(--border)" }}>
@@ -411,6 +423,31 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   setIsSubmitting(false);
                 }
               }} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+
+                {/* PRODUCT SUMMARY IN QUICK ORDER */}
+                <div style={{ 
+                  background: "rgba(255,255,255,0.03)", 
+                  padding: "16px", 
+                  border: "1px solid var(--border)", 
+                  display: "flex", 
+                  gap: "12px", 
+                  alignItems: "center" 
+                }}>
+                  <div style={{ position: "relative", width: "48px", height: "48px", background: "#000", border: "1px solid var(--border)" }}>
+                    <Image src={product.images[0]} alt="" fill style={{ objectFit: "cover" }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: "14px", fontWeight: 700, color: "#fff", marginBottom: "2px" }}>{product.name}</p>
+                    <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                      {selectedVariant.flavor} {selectedVariant.size && `/ ${selectedVariant.size}`} — Qty: {qty}
+                    </p>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <p style={{ fontSize: "14px", fontWeight: 700, color: "var(--accent)" }}>
+                      {((product.sale_price || product.price) * qty).toLocaleString()} DA
+                    </p>
+                  </div>
+                </div>
                 
                 {orderError && (
                   <div style={{ padding: "12px", background: "rgba(239, 68, 68, 0.1)", border: "1px solid #ef444444", borderRadius: "6px", color: "#ef4444", fontSize: "13px", fontWeight: 700 }}>

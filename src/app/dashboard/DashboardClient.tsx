@@ -40,12 +40,13 @@ interface DashboardClientProps {
 }
 
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; color: string; bg: string; Icon: React.ElementType }> = {
   pending:   { label: "En attente",  color: "#f59e0b", bg: "#2a1f00", Icon: Clock },
   confirmed: { label: "Confirmée",   color: "#3b82f6", bg: "#001a2a", Icon: CheckCircle },
   shipped:   { label: "Expédiée",    color: "#a855f7", bg: "#1a0029", Icon: Truck },
   delivered: { label: "Livrée",      color: "#22c55e", bg: "#002214", Icon: CheckCircle },
   cancelled: { label: "Annulée",     color: "#ef4444", bg: "#2a0000", Icon: XCircle },
+  returned:  { label: "Retour",      color: "#f43f5e", bg: "#4c0519", Icon: XCircle },
 };
 
 export default function DashboardClient({ stats, allOrders, recentOrders, lowStock, activeProductsCount, revenueResetAt }: DashboardClientProps) {

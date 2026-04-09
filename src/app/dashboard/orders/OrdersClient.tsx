@@ -16,6 +16,7 @@ const statusConfig: Record<Status, { label: string; color: string; bg: string; I
   shipped:   { label: "Expédiée",    color: "#a855f7", bg: "#1a0029", Icon: Truck },
   delivered: { label: "Livrée",      color: "#22c55e", bg: "#002214", Icon: CheckCircle },
   cancelled: { label: "Annulée",     color: "#ef4444", bg: "#2a0000", Icon: XCircle },
+  returned:  { label: "Retour",      color: "#f43f5e", bg: "#4c0519", Icon: XCircle },
 };
 
 const nextStatus: Partial<Record<Status, Status>> = {
@@ -46,8 +47,24 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
     return matchSearch && matchStatus;
   });
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const statusPriority: Record<Status, number> = {
+    pending: 0,
+    confirmed: 1,
+    shipped: 2,
+    returned: 3,
+    cancelled: 4,
+    delivered: 5,
+  };
+
+  const sorted = [...filtered].sort((a, b) => {
+    const pA = statusPriority[a.status];
+    const pB = statusPriority[b.status];
+    if (pA !== pB) return pA - pB;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
+  const paginated = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const handleSearchChange = (val: string) => {
     setSearch(val);
@@ -134,7 +151,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
 
       {/* Count badges */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
-        {(["all", "pending", "confirmed", "shipped", "delivered", "cancelled"] as const).map(s => {
+        {(["all", "pending", "confirmed", "shipped", "delivered", "cancelled", "returned"] as const).map(s => {
           const count = s === "all" ? orders.length : orders.filter(o => o.status === s).length;
           const cfg = s !== "all" ? statusConfig[s] : null;
           return (
@@ -161,7 +178,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
             AUCUNE COMMANDE TROUVÉE
           </div>
         ) : (
-          paginated.map(order => {
+          paginated.map((order: Order) => {
             const cfg = statusConfig[order.status];
             const StatusIcon = cfg.Icon;
             const isExpanded = expanded === order.id;
@@ -171,7 +188,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
               <div key={order.id} style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: "0px", overflow: "hidden" }}>
                 {/* Main row */}
                 <div
-                  style={{ display: "grid", gridTemplateColumns: "1fr 140px 100px 140px 160px 48px", alignItems: "center", padding: "16px 20px", cursor: "pointer", transition: "background 0.15s ease" }}
+                  style={{ display: "grid", gridTemplateColumns: "1fr 120px 100px 120px 200px 48px", alignItems: "center", padding: "16px 20px", cursor: "pointer", transition: "background 0.15s ease" }}
                   onClick={() => setExpanded(isExpanded ? null : order.id)}
                   onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
@@ -226,12 +243,20 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                       <button
                         onClick={e => { e.stopPropagation(); updateStatus(order.id, next); }}
                         className="btn-accent"
-                        style={{ padding: "7px 14px", borderRadius: "0px", border: "none", cursor: "pointer", fontSize: "11px", whiteSpace: "nowrap" }}
+                        style={{ padding: "7px 10px", borderRadius: "0px", border: "none", cursor: "pointer", fontSize: "11px", whiteSpace: "nowrap" }}
                       >
-                        → {statusConfig[next].label}
+                        {statusConfig[next].label}
                       </button>
                     )}
-                    {order.status !== "cancelled" && order.status !== "delivered" && (
+                    {order.status === "shipped" && (
+                      <button
+                        onClick={e => { e.stopPropagation(); updateStatus(order.id, "returned"); }}
+                        style={{ padding: "7px 12px", borderRadius: "0px", border: "1px solid #f43f5e44", background: "#f43f5e11", cursor: "pointer", fontSize: "11px", color: "#f43f5e", fontFamily: "var(--font-condensed)", fontWeight: 700 }}
+                      >
+                        Retour
+                      </button>
+                    )}
+                    {order.status !== "cancelled" && order.status !== "delivered" && order.status !== "returned" && (
                       <button
                         onClick={e => { e.stopPropagation(); updateStatus(order.id, "cancelled"); }}
                         style={{ padding: "7px 12px", borderRadius: "0px", border: "1px solid #ef444444", background: "transparent", cursor: "pointer", fontSize: "11px", color: "#ef4444", fontFamily: "var(--font-condensed)", fontWeight: 700 }}
@@ -289,6 +314,23 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                         <p style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700, letterSpacing: "0.08em", marginBottom: "6px" }}>ADRESSE</p>
                         <p style={{ fontSize: "14px", color: "var(--text-primary)" }}>{order.address}</p>
                         <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>{order.wilaya}</p>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700, letterSpacing: "0.08em", marginBottom: "6px" }}>PRODUITS COMMANDÉS</p>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                          {order.items?.map((item: any) => (
+                            <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.05)", pb: "6px" }}>
+                              <div style={{ flex: 1 }}>
+                                <p style={{ fontSize: "14px", fontWeight: 600 }}>{item.products?.name}</p>
+                                <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>{item.variants?.flavor} {item.variants?.size && `/ ${item.variants?.size}`}</p>
+                              </div>
+                              <div style={{ textAlign: "right" }}>
+                                <p style={{ fontSize: "13px", fontWeight: 700 }}>{item.quantity} x {item.unit_price.toLocaleString()} DA</p>
+                                <p style={{ fontSize: "14px", color: "var(--accent)", fontWeight: 800 }}>{(item.quantity * item.unit_price).toLocaleString()} DA</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                       <div>
                         <p style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-condensed)", fontWeight: 700, letterSpacing: "0.08em", marginBottom: "6px" }}>RÉCAPITULATIF</p>

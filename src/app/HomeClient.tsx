@@ -67,19 +67,19 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
 
         <div className="hero-content" style={{ position: "relative", zIndex: 2, maxWidth: "1280px", margin: "0 auto", padding: "0 24px", height: "100%", display: "flex", alignItems: "center" }}>
           <div style={{ maxWidth: "600px", opacity: fade ? 1 : 0, transform: fade ? "translateY(0)" : "translateY(12px)", transition: "all 0.5s ease 0.1s" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--accent)", color: "#000", fontFamily: "var(--font-alt)", fontWeight: 700, fontSize: "11px", letterSpacing: "0.1em", padding: "5px 12px", borderRadius: "0px", marginBottom: "20px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "var(--accent)", color: "#000", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontWeight: 700, fontSize: "11px", letterSpacing: "0.1em", padding: "5px 12px", borderRadius: "0px", marginBottom: "20px" }}>
               <Zap size={12} strokeWidth={3} />
-              {current.tag}
+              {locale === 'ar' ? (current.tagAr || current.tag) : current.tag}
             </div>
-            <h1 className="section-heading glow-accent" style={{ fontFamily: "var(--font-alt)", fontSize: "clamp(40px, 7vw, 86px)", fontWeight: 700, color: "#fff", marginBottom: "20px", whiteSpace: "pre-line", lineHeight: 1.05 }}>
-              {current.title}
+            <h1 className="section-heading glow-accent" style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontSize: "clamp(40px, 7vw, 86px)", fontWeight: 700, color: "#fff", marginBottom: "20px", whiteSpace: "pre-line", lineHeight: 1.05 }}>
+              {locale === 'ar' ? (current.titleAr || current.title) : current.title}
             </h1>
-            <p style={{ fontFamily: "var(--font-alt)", fontSize: "17px", color: "rgba(255,255,255,0.7)", marginBottom: "36px", fontWeight: 400 }}>
-              {current.sub}
+            <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontSize: "17px", color: "rgba(255,255,255,0.7)", marginBottom: "36px", fontWeight: 400 }}>
+              {locale === 'ar' ? (current.subAr || current.sub) : current.sub}
             </p>
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
               <Link href={current.href} className="btn-accent" style={{ padding: "14px 32px", borderRadius: "0px", textDecoration: "none", fontSize: "15px", display: "inline-block", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-alt)', fontWeight: 700 }}>
-                {t("hero.cta")}
+                {locale === 'ar' ? (current.ctaAr || t("hero.cta")) : (current.cta || t("hero.cta"))}
               </Link>
               <Link href="/products" className="glass-btn" style={{ 
                 padding: "14px 32px", 
@@ -143,8 +143,8 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
             <div>
-              <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.12em", color: "var(--text-muted)", fontWeight: 600, marginBottom: "4px" }}>{landingContent?.brands?.label || t("home.brandsLabel")}</p>
-              <h2 className="section-heading" style={{ fontSize: "32px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{landingContent?.brands?.heading || t("home.brandsHeading")}</h2>
+              <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.12em", color: "var(--text-muted)", fontWeight: 600, marginBottom: "4px" }}>{locale === 'ar' ? t("home.brandsLabel") : (landingContent?.brands?.label || t("home.brandsLabel"))}</p>
+              <h2 className="section-heading" style={{ fontSize: "32px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{locale === 'ar' ? t("home.brandsHeading") : (landingContent?.brands?.heading || t("home.brandsHeading"))}</h2>
             </div>
             <div style={{ display: "flex", gap: "8px" }}>
               <button onClick={() => setBrandStart(i => Math.max(0, i - 1))} className="btn-ghost" style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)", background: "none", cursor: "pointer", color: "var(--text-secondary)", display: "flex", alignItems: "center" }}>
@@ -174,9 +174,9 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
       {/* GOALS */}
       <section style={{ maxWidth: "1280px", margin: "0 auto", padding: "72px 24px 0", background: "#" }}>
         <div style={{ marginBottom: "40px" }}>
-          <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>{landingContent?.goals?.label || t("home.goalsLabel")}</p>
+          <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "6px" }}>{locale === 'ar' ? t("home.goalsLabel") : (landingContent?.goals?.label || t("home.goalsLabel"))}</p>
           <h2 className="section-heading" style={{ fontSize: "clamp(36px, 5vw, 52px)", color: "#ffff", whiteSpace: "pre-line", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
-            {landingContent?.goals?.heading || t("home.goalsHeading")}
+            {locale === 'ar' ? t("home.goalsHeading") : (landingContent?.goals?.heading || t("home.goalsHeading"))}
           </h2>
         </div>
 
@@ -211,7 +211,9 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                     style={{ objectFit: "cover" }}
                   />
                   <div className="goal-overlay" />
-                  <h3 className="goal-title section-heading" style={{ fontSize: "16px", marginBottom: "8px" }}>{(item.label || "OBJECTIF").toUpperCase()}</h3>
+                  <h3 className="goal-title section-heading" style={{ fontSize: "16px", marginBottom: "8px", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+                    {(locale === 'ar' ? (item.labelAr || item.label || "OBJECTIF") : (item.label || "OBJECTIF")).toUpperCase()}
+                  </h3>
                 </Link>
               ))}
             </div>
@@ -220,8 +222,8 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
       </section>
 
       {/* PROMO TICKER */}
-      <div className="promo-bar" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: landingContent?.promo?.bgColor || "#FF51C5", color: landingContent?.promo?.textColor || "#000" }}>
-        <div className="promo-wrap" style={{ overflow: "hidden", maxWidth: "100vw" }}>
+      <div className="promo-bar" style={{ width: "100%", background: landingContent?.promo?.bgColor || "#FF51C5", color: landingContent?.promo?.textColor || "#000" }}>
+        <div className="promo-wrap" style={{ overflow: "hidden", maxWidth: "100%" }}>
           <div className="promo-inner" style={{ display: "inline-block", whiteSpace: "nowrap", padding: "10px 0" }}>
             {landingContent?.promo?.text || `${t("home.promoText")} ${t("home.promoText")} ${t("home.promoText")}`}
           </div>
@@ -232,13 +234,7 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
       <section style={{ background: landingContent?.flash?.bgColor || "#0A0A0A", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "60px 0" }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
           {/* Header: button left, label+heading right */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", marginBottom: "20px" }}>
-            <div style={{ flex: "0 0 auto" }}>
-              <Link href="/products?filter=sale" className="btn-ghost" style={{ padding: "13px 24px", borderRadius: "6px", textDecoration: "none", fontSize: "14px", display: "inline-block", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
-                {t("home.viewSales")}
-              </Link>
-            </div>
-             <div className="mobile-text-center" style={{ textAlign: "right", flex: "1 1 320px" }}>
+             <div className="mobile-text-center" style={{ textAlign: "right", flex: "1 1 320px", display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
                <div style={{ marginBottom: "4px" }}>
                  <span style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-dm)', fontSize: "12px", fontWeight: 400, letterSpacing: "0.25em", color: "#ff3b3b" }}>{t("home.flashLabel")}</span>
                </div>
@@ -246,7 +242,6 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
                 {t("home.flashTitle")}<br /><span style={{ color: landingContent?.flash?.accentColor || "#FF51C5" }}>{t("home.flashSub")}</span>
                </h2>
              </div>
-          </div>
 
           {/* Big featured sale card - Redesigned for Premium Aesthetic */}
           <div className="flash-big-card" style={{ 
@@ -370,10 +365,34 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
             </div>
           </div>
 
-          {/* Expiry row moved under the big card */}
-          <div className="mobile-stack" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "1280px", margin: "8px auto 24px", padding: "0 24px" }}>
-            <div style={{ fontSize: "14px", color: "var(--text-secondary)", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("home.offerExpires")}</div>
-            <Countdown targetDate={saleTarget} />
+          <div style={{ maxWidth: "1280px", margin: "16px auto 24px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
+              <div style={{ fontSize: "14px", color: "var(--text-secondary)", letterSpacing: "0.3em", textTransform: "uppercase", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>{t("home.offerExpires")}</div>
+              <Countdown targetDate={saleTarget} />
+            </div>
+            
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "12px" }}>
+              <Link href="/products?filter=sale" 
+                style={{ 
+                  textDecoration: "none", 
+                  borderBottom: "1px solid rgba(255,255,255,0.25)", 
+                  paddingBottom: "2px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "6px", 
+                  color: "var(--text-secondary)", 
+                  fontFamily: "var(--font-condensed)", 
+                  fontWeight: 400, 
+                  fontSize: "11px",
+                  letterSpacing: "0.15em",
+                  transition: "all 0.2s ease"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = "#ffffff"; e.currentTarget.style.borderBottomColor = "rgba(255,255,255,1)"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.borderBottomColor = "rgba(255,255,255,0.25)"; }}
+              >
+                {t("home.viewSales").toUpperCase()} <ChevronRight size={10} color="#fff" strokeWidth={1.5} />
+              </Link>
+            </div>
           </div>
 
           {/* Grid of remaining sale products (if any) */}
@@ -397,10 +416,10 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
             padding: "4px 12px",
             textTransform: "uppercase"
           }}>
-            {landingContent?.featured?.label || t("home.featuredLabel")}
+            {locale === 'ar' ? t("home.featuredLabel") : (landingContent?.featured?.label || t("home.featuredLabel"))}
           </p>
           <h2 className="section-heading" style={{ fontSize: "clamp(32px, 5vw, 42px)", lineHeight: "1.1", color: "#000", whiteSpace: "pre-line", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
-            {landingContent?.featured?.heading || t("home.featuredHeading")}
+            {locale === 'ar' ? t("home.featuredHeading") : (landingContent?.featured?.heading || t("home.featuredHeading"))}
           </h2>
         </div>
 
@@ -497,9 +516,9 @@ export default function HomeClient({ featuredProducts, saleProducts, brands, cat
       <section style={{ background: "var(--bg-secondary)", borderTop: "1px solid var(--border)", padding: "72px 24px" }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
           <div style={{ textAlign: "center", marginBottom: "52px" }}>
-            <p style={{ fontFamily: "var(--font-condensed)", fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "8px" }}>LIVRAISON & EXPÉDITION</p>
-            <h2 className="section-heading" style={{ fontSize: "clamp(28px, 4vw, 40px)", maxWidth: "560px", margin: "0 auto" }}>
-              VOTRE COMMANDE LIVRÉE AVEC SOIN AVEC NOEST-DZ
+            <p style={{ fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'var(--font-condensed)', fontSize: "12px", letterSpacing: "0.12em", color: "var(--accent)", fontWeight: 700, marginBottom: "8px" }}>{t("home.deliveryLabel")}</p>
+            <h2 className="section-heading" style={{ fontSize: "clamp(28px, 4vw, 40px)", maxWidth: "560px", margin: "0 auto", fontFamily: locale === 'ar' ? 'var(--font-cairo)' : 'inherit' }}>
+              {t("home.deliveryHeading")}
             </h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "3px", marginBottom: "40px" }}>

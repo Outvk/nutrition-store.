@@ -33,6 +33,8 @@
 }
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
 }
 body {
   background-color: var(--bg-primary);
@@ -41,8 +43,9 @@ body {
   font-weight: 400;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  position: relative;
 }
 
 ::-webkit-scrollbar {
@@ -769,35 +772,33 @@ body {
   scrollbar-width: none;
 }
 
-/* ─── RTL Layout Protection ────────────────────────────────────────────── */
-/* When Arabic is active (html[dir=rtl]), lock structural layout elements   */
-/* to LTR so flex/grid reordering does not break the carefully-built UI.   */
+/* ─── RTL Layout Protection ───────────────────────────────────────────────
+   Dual selectors (html.rtl-mode AND html[dir="rtl"]) so this fires
+   reliably in both localhost (dev) and production SSR (Vercel).
+──────────────────────────────────────────────────────────────────────────── */
 
-html[dir="rtl"] nav,
-html[dir="rtl"] .ticker-wrap,
-html[dir="rtl"] .ticker-inner,
-html[dir="rtl"] .promo-bar,
-html[dir="rtl"] .promo-wrap,
-html[dir="rtl"] .promo-inner,
-html[dir="rtl"] .hero-section,
-html[dir="rtl"] .hero-content,
-html[dir="rtl"] .hero-slide-arrows,
-html[dir="rtl"] .hero-dots,
-html[dir="rtl"] .brands-grid,
-html[dir="rtl"] .goals-grid,
-html[dir="rtl"] .local-goals-grid,
-html[dir="rtl"] .flash-big-card,
-html[dir="rtl"] .flash-big-card-inner,
-html[dir="rtl"] .flash-image-wrap,
-html[dir="rtl"] .responsive-grid-split,
-html[dir="rtl"] .featured-visual,
-html[dir="rtl"] .featured-visual-overlay,
-html[dir="rtl"] .mobile-grid-2,
-html[dir="rtl"] .checkout-grid,
-html[dir="rtl"] .checkout-summary-sticky,
-html[dir="rtl"] .product-gallery-flex,
-html[dir="rtl"] .product-thumbnails-list,
-html[dir="rtl"] .mobile-grid-1,
-html[dir="rtl"] .brands-grid {
+/* Navbar: keep layout direction LTR so fixed positioning has no RTL edge offset */
+html.rtl-mode nav,
+html[dir="rtl"] nav {
   direction: ltr;
+}
+
+/* Promo ticker: direction + explicit margin anchor.
+   The margin-left: calc(50% - 50vw) full-bleed trick drifts in RTL because
+   the scroll origin shifts. Force both margins so the bar always hugs edges. */
+html.rtl-mode .promo-bar,
+html[dir="rtl"] .promo-bar,
+html.rtl-mode .promo-wrap,
+html[dir="rtl"] .promo-wrap,
+html.rtl-mode .ticker-wrap,
+html[dir="rtl"] .ticker-wrap,
+html.rtl-mode .ticker-inner,
+html[dir="rtl"] .ticker-inner {
+  direction: ltr;
+}
+
+html.rtl-mode .promo-bar,
+html[dir="rtl"] .promo-bar {
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: 0 !important;
 }

@@ -93,8 +93,16 @@ export async function getAllOrders() {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('orders')
-    .select('id, full_name, phone, wilaya, address, total, delivery_fee, status, created_at')
+    .select(`
+      *,
+      items:order_items (
+        *,
+        products (name),
+        variants (flavor, size)
+      )
+    `)
     .order('created_at', { ascending: false })
+  
   if (error) throw new AppError('InternalError', `Fetch orders failed: ${error.message}`, 500)
   return data || []
 }

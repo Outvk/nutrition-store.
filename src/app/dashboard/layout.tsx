@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Nav */}
-      <nav className="dash-sidebar-nav" style={{ padding: "16px 12px", flex: 1 }}>
+      <nav className="dash-sidebar-nav" style={{ padding: "16px 12px", flex: 1, overflowY: "auto" }}>
         {navItems.map(item => {
           const active = pathname === item.href;
           return (
@@ -117,7 +117,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .dash-main-wrapper { flex-direction: row; }
         @media (max-width: 767px) {
           .dash-main-wrapper { flex-direction: column !important; }
-          .dash-sidebar-container { width: 100% !important; height: auto !important; position: relative !important; border-bottom: 1px solid var(--border) !important; padding-bottom: 0 !important; }
+          .dash-sidebar-container { width: 100% !important; height: auto !important; position: sticky !important; top: 0 !important; z-index: 100 !important; border-bottom: 1px solid var(--border) !important; padding-bottom: 0 !important; }
           .dash-sidebar-nav { display: flex !important; flex-direction: row !important; overflow-x: auto !important; padding: 4px !important; gap: 8px !important; -ms-overflow-style: none; scrollbar-width: none; }
           .dash-sidebar-nav::-webkit-scrollbar { display: none; }
           .dash-sidebar-nav-item { flex-shrink: 0 !important; padding: 12px 16px !important; border-left: none !important; border-bottom: 2px solid transparent !important; margin-bottom: 0 !important; }

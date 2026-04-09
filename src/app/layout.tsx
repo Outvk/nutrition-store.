@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${poppins.variable} ${bebas.variable} ${dmSans.variable} ${cairo.variable}`}>
+    <html lang="fr" suppressHydrationWarning className={`${poppins.variable} ${bebas.variable} ${dmSans.variable} ${cairo.variable}`}>
       <body suppressHydrationWarning className={`${poppins.className}`}>
         <LanguageProvider>
           {children}

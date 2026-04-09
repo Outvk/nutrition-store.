@@ -47,7 +47,7 @@ export interface Order {
   address: string;
   total: number;
   delivery_fee: number;
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
   created_at: string;
   items?: OrderItem[];
 }
