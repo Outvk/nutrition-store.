@@ -561,7 +561,11 @@ export default function Navbar() {
                           gap: "12px",
                           transition: "color 0.2s"
                         }}>
-                        {cat.image_url && <img src={cat.image_url} alt={cat.name} style={{ width: "40px", height: "40px", borderRadius: "0", objectFit: "cover" }} />}
+                        {cat.image_url && (
+                          <div style={{ width: "40px", height: "40px", position: "relative", flexShrink: 0, background: "var(--bg-elevated)" }}>
+                            <Image src={cat.image_url} alt={cat.name} fill style={{ objectFit: "cover" }} />
+                          </div>
+                        )}
                         <span>{cat.name.toUpperCase()}</span>
                       </Link>
                     ))}
@@ -583,7 +587,11 @@ export default function Navbar() {
                           alignItems: "center",
                           gap: "12px"
                         }}>
-                        {brand.logo_url && <img src={brand.logo_url} alt={brand.name} style={{ width: "40px", height: "40px", borderRadius: "0", objectFit: "cover" }} />}
+                        {brand.logo_url && (
+                          <div style={{ width: "40px", height: "40px", position: "relative", flexShrink: 0, background: "#fff", padding: "4px" }}>
+                            <Image src={brand.logo_url} alt={brand.name} fill style={{ objectFit: "contain" }} />
+                          </div>
+                        )}
                         <span>{brand.name.toUpperCase()}</span>
                       </Link>
                     ))}
