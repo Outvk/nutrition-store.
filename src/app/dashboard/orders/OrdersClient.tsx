@@ -17,6 +17,7 @@ const statusConfig: Record<Status, { label: string; color: string; bg: string; I
   delivered: { label: "Livrée",      color: "#22c55e", bg: "#002214", Icon: CheckCircle },
   cancelled: { label: "Annulée",     color: "#ef4444", bg: "#2a0000", Icon: XCircle },
   returned:  { label: "Retour",      color: "#f43f5e", bg: "#4c0519", Icon: XCircle },
+  abandoned: { label: "Abandonné",   color: "#94a3b8", bg: "#1e293b", Icon: XCircle },
 };
 
 const nextStatus: Partial<Record<Status, Status>> = {
@@ -53,7 +54,8 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
     shipped: 2,
     returned: 3,
     cancelled: 4,
-    delivered: 5,
+    abandoned: 5,
+    delivered: 6,
   };
 
   const sorted = [...filtered].sort((a, b) => {
@@ -149,9 +151,8 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
         </div>
       </div>
 
-      {/* Count badges */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
-        {(["all", "pending", "confirmed", "shipped", "delivered", "cancelled", "returned"] as const).map(s => {
+        {(["all", "pending", "confirmed", "shipped", "delivered", "abandoned", "cancelled", "returned"] as const).map(s => {
           const count = s === "all" ? orders.length : orders.filter(o => o.status === s).length;
           const cfg = s !== "all" ? statusConfig[s] : null;
           return (

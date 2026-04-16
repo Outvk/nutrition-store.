@@ -25,6 +25,7 @@ const orderSchema = z.object({
   ).min(1).max(20),
   turnstileToken: z.string(),
   livraison_type: z.enum(['domicile', 'stopdesk']).optional().default('domicile'),
+  abandonedOrderId: z.string().uuid().optional(),
 });
 
 export async function POST(req: Request) {
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Validation failed', details: result.error.issues }, { status: 400 });
     }
 
-    const { turnstileToken, items, ...orderData } = result.data;
+    const { turnstileToken, items, abandonedOrderId, ...orderData } = result.data;
 
     // Verify Cloudflare Turnstile token
     const hasValidTurnstile = process.env.TURNSTILE_SECRET && !process.env.TURNSTILE_SECRET.includes("your-");
@@ -134,6 +135,11 @@ export async function POST(req: Request) {
 
     // Insert order + order_items using validated data
     const { orderId } = await insertOrder(finalOrderData, validatedItems);
+
+    // If there was an abandoned order, delete it now
+    if (abandonedOrderId) {
+      await supabase.from('orders').delete().eq('id', abandonedOrderId).eq('status', 'abandoned');
+    }
 
     return NextResponse.json({ orderId });
   } catch (error: unknown) {

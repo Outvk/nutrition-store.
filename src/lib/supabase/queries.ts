@@ -139,6 +139,45 @@ export async function insertOrder(orderData: OrderInsert, items: OrderItemInsert
   return { orderId: data as string }
 }
 
+export async function upsertAbandonedOrder(orderData: any, items: OrderItemInsert[], existingOrderId?: string) {
+  const supabase = await createClient()
+
+  if (existingOrderId) {
+    const { error: orderError } = await supabase
+      .from('orders')
+      .update({ ...orderData, status: 'abandoned', updated_at: new Date().toISOString() })
+      .eq('id', existingOrderId)
+    
+    if (orderError) throw orderError
+
+    await supabase.from('order_items').delete().eq('order_id', existingOrderId)
+    
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(items.map(i => ({ ...i, order_id: existingOrderId })))
+    
+    if (itemsError) throw itemsError
+    
+    return { orderId: existingOrderId }
+  } else {
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({ ...orderData, status: 'abandoned' })
+      .select('id')
+      .single()
+    
+    if (orderError) throw orderError
+    
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(items.map(i => ({ ...i, order_id: order.id })))
+    
+    if (itemsError) throw itemsError
+    
+    return { orderId: order.id }
+  }
+}
+
 export async function updateOrderStatus(id: string, status: string) {
   const supabase = await createClient()
   const { error } = await supabase

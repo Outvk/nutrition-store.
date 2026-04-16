@@ -47,6 +47,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string; I
   delivered: { label: "Livrée",      color: "#22c55e", bg: "#002214", Icon: CheckCircle },
   cancelled: { label: "Annulée",     color: "#ef4444", bg: "#2a0000", Icon: XCircle },
   returned:  { label: "Retour",      color: "#f43f5e", bg: "#4c0519", Icon: XCircle },
+  abandoned: { label: "Abandonné",   color: "#94a3b8", bg: "#1e293b", Icon: Clock },
 };
 
 export default function DashboardClient({ stats, allOrders, recentOrders, lowStock, activeProductsCount, revenueResetAt }: DashboardClientProps) {
@@ -67,7 +68,7 @@ export default function DashboardClient({ stats, allOrders, recentOrders, lowSto
 
   const statCards = [
     { label: "Revenu total", value: `${animatedRevenue.toLocaleString()} DA`, icon: TrendingUp, color: "#e8ff00", sub: "Commandes livrées" },
-    { label: "Commandes totales", value: animatedOrders, icon: ShoppingBag, color: "#3b82f6", sub: `${pendingCount} en attente` },
+    { label: "Commandes totales", value: animatedOrders, icon: ShoppingBag, color: "#3b82f6", sub: `${pendingCount} en attente • ${allOrders.filter(o => o.status === 'abandoned').length} abandonnés` },
     { label: "Produits actifs", value: animatedProducts, icon: Package, color: "#22c55e", sub: `${outOfStockArr.length} épuisés` },
     { label: "Stock faible", value: animatedLowStock, icon: AlertTriangle, color: "#f59e0b", sub: "variants ≤ 5 unités" },
   ];

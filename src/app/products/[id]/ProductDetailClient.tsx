@@ -44,6 +44,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const [isMobile, setIsMobile] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [loadingFee, setLoadingFee] = useState(false);
+  const [abandonedOrderId, setAbandonedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -83,6 +84,50 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const currentWilayaName = algeriaWilayas.find(w => w.code === selectedWilaya)?.name || "";
   const calculatedFee = selectedWilaya ? (livraisonType === 'domicile' ? deliveryFee : Math.max(200, deliveryFee - 200)) : 0;
   const totalWithShipping = ((product.sale_price || product.price) * qty) + calculatedFee;
+
+  // Abandoned Cart Detection (Quick Order)
+  useEffect(() => {
+    if (orderSuccess || isSubmitting || !selectedVariant) return;
+    if (!nom && !prenom && !phone) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const payload = {
+          orderData: {
+            full_name: `${nom} ${prenom}`.trim() || "Client Inconnu",
+            phone: phone || "0000000000",
+            wilaya: currentWilayaName || "Inconnu",
+            address: `${livraisonType === 'domicile' ? 'Domicile' : 'Stop Desk'} - ${commune || ''} - ${adresse || ''}`,
+            total: totalWithShipping,
+            delivery_fee: calculatedFee,
+          },
+          items: [{
+            product_id: product.id,
+            variant_id: selectedVariant.id,
+            quantity: qty,
+            unit_price: product.sale_price || product.price
+          }],
+          existingOrderId: abandonedOrderId
+        };
+
+        const res = await fetch("/api/orders/abandoned", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const { orderId } = await res.json();
+          setAbandonedOrderId(orderId);
+        }
+      } catch (err) {
+        console.error("Failed to save abandoned quick order", err);
+      }
+    }, 3000); // 3 second debounce
+
+    return () => clearTimeout(timer);
+  }, [nom, prenom, phone, selectedWilaya, commune, adresse, livraisonType, selectedVariant, qty, orderSuccess, isSubmitting, abandonedOrderId, totalWithShipping, calculatedFee, product.id, product.price, product.sale_price, currentWilayaName]);
+
 
   const handleAddToCart = () => {
     if (selectedVariant) {
@@ -402,7 +447,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                       quantity: qty,
                       unit_price: unitPrice
                     }],
-                    turnstileToken: "dummy_token" // Replace with real Turnstile token integration if enabled
+                    turnstileToken: "dummy_token",
+                    abandonedOrderId: abandonedOrderId || undefined
                   };
 
                   const res = await fetch("/api/orders", {

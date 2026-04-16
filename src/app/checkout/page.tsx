@@ -89,6 +89,7 @@ export default function CheckoutPage() {
   const [apiError, setApiError] = useState("");
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [loadingFee, setLoadingFee] = useState(false);
+  const [abandonedOrderId, setAbandonedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     setCartItems(getCart());
@@ -125,6 +126,50 @@ export default function CheckoutPage() {
     : 0;
   const total = subtotal + calculatedFee;
 
+  // Abandoned Cart Detection
+  useEffect(() => {
+    if (isSuccess || submitting || cartItems.length === 0) return;
+    if (!form.full_name && !form.phone) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const payload = {
+          orderData: {
+            full_name: form.full_name || "Client Inconnu",
+            phone: form.phone || "0000000000",
+            wilaya: form.wilaya || "Inconnu",
+            address: `${form.livraison_type === 'domicile' ? 'Domicile' : 'Stop Desk'} - ${form.commune || ''} - ${form.address || ''}`,
+            total,
+            delivery_fee: calculatedFee,
+          },
+          items: cartItems.map(item => ({
+            product_id: item.product.id,
+            variant_id: item.variant?.id || null,
+            quantity: item.quantity,
+            unit_price: item.product.sale_price || item.product.price
+          })),
+          existingOrderId: abandonedOrderId
+        };
+
+        const res = await fetch("/api/orders/abandoned", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const { orderId } = await res.json();
+          setAbandonedOrderId(orderId);
+        }
+      } catch (err) {
+        console.error("Failed to save abandoned cart", err);
+      }
+    }, 3000); // 3 second debounce
+
+    return () => clearTimeout(timer);
+  }, [form, cartItems, isSuccess, submitting, abandonedOrderId, total, calculatedFee]);
+
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.full_name.trim() || form.full_name.length < 3) e.full_name = t("common.form.validation.name");
@@ -158,7 +203,9 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           unit_price: item.product.sale_price || item.product.price
         })),
-        turnstileToken: "dummy_token"
+        turnstileToken: "dummy_token",
+        livraison_type: form.livraison_type,
+        abandonedOrderId: abandonedOrderId || undefined
       };
 
       const res = await fetch("/api/orders", {
